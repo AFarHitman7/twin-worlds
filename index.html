@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TWIN WORLDS — Earth, Mars &amp; the Moon</title>
+  <meta name="description" content="Earth holds deserts, craters and lava fields that mirror Mars and the Moon. Explore over 20 real analogue sites, compare them side by side, and play the guess-the-planet game." />
+  <meta name="theme-color" content="#05060b" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200..600&family=Inter:opsz,wght@14..32,400..600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- PRELOADER -->
+  <div class="loader" id="loader" aria-hidden="true">
+    <div class="loader__core">
+      <div class="loader__rings"><span></span><span></span><span></span></div>
+      <div class="loader__word">TWIN&nbsp;WORLDS</div>
+      <div class="loader__bar"><span id="loaderBar"></span></div>
+      <div class="loader__pct" id="loaderPct">00%</div>
+    </div>
+  </div>
+
+  <!-- CURSOR + FX LAYERS -->
+  <div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
+  <div class="cursor-ring" id="cursorRing" aria-hidden="true"></div>
+  <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+  <canvas id="stars" aria-hidden="true"></canvas>
+  <canvas id="trail" aria-hidden="true"></canvas>
+  <div class="nebula" aria-hidden="true"></div>
+  <div class="aurora" aria-hidden="true"><span class="a1"></span><span class="a2"></span><span class="a3"></span><span class="a4"></span></div>
+  <div class="grid-overlay" aria-hidden="true"></div>
+  <div class="noise" aria-hidden="true"></div>
+  <div class="vignette" aria-hidden="true"></div>
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <header class="nav" id="nav">
+    <a class="nav__brand" href="#top" aria-label="Twin Worlds, back to top">
+      <span class="nav__mark" aria-hidden="true"><span class="nav__orbit"></span></span>
+      <span class="nav__name">TWIN&nbsp;WORLDS</span>
+      <span class="nav__live"><i></i>LIVE&nbsp;ORBIT</span>
+    </a>
+    <nav class="nav__links" id="navLinks" aria-label="Primary">
+      <a href="#worlds" data-spy="worlds"><em>01</em>Worlds</a>
+      <a href="#mars" data-spy="mars"><em>02</em>Mars</a>
+      <a href="#moon" data-spy="moon"><em>03</em>Moon</a>
+      <a href="#compare" data-spy="compare"><em>04</em>Compare</a>
+      <a href="#gallery" data-spy="gallery"><em>05</em>Gallery</a>
+      <a href="#game" data-spy="game"><em>06</em>Game</a>
+    </nav>
+    <a class="btn btn--ghost nav__cta magnetic" href="#game"><span class="btn__flare"></span>Play ↗</a>
+    <button class="nav__toggle" id="navToggle" aria-expanded="false" aria-controls="navLinks" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero" id="top">
+      <div class="hero__bgword" aria-hidden="true"><span>TWIN WORLDS • TWIN WORLDS • TWIN WORLDS</span></div>
+      <div class="hero__beams" aria-hidden="true"><span></span><span></span><span></span></div>
+      <div class="hero__copy">
+        <p class="hero__badge reveal"><span class="pulse-dot"></span>EARTH&nbsp;&nbsp;·&nbsp;&nbsp;MARS&nbsp;&nbsp;·&nbsp;&nbsp;MOON<span class="hero__badge-glow"></span></p>
+        <h1 class="hero__title" id="heroTitle">Other worlds are closer than you think.</h1>
+        <p class="hero__sub">Deserts, craters and lava fields on Earth mirror Mars and the Moon so closely that astronauts train for space without leaving the ground.</p>
+        <div class="hero__actions">
+          <a class="btn btn--solid magnetic" href="#worlds"><span class="btn__flare"></span>Explore the worlds ↓</a>
+          <a class="btn btn--brass magnetic" href="#game"><span class="btn__flare"></span>Guess the planet ✦</a>
+        </div>
+        <div class="hero__meta">
+          <div class="hero__stat"><b data-count="23">0</b><span>analogue sites<br/>mapped</span></div>
+          <div class="hero__stat"><b data-count="3">0</b><span>worlds<br/>compared</span></div>
+          <div class="hero__stat"><b data-count="12">0</b><span>rounds in<br/>the game</span></div>
+          <div class="hero__stat hero__stat--live"><b>◉</b><span>live starfield<br/>warp on scroll</span></div>
+        </div>
+      </div>
+
+      <div class="hero__orbs" aria-hidden="true">
+        <div class="hero__halo"></div>
+        <div class="orb orb--earth" data-depth="0.9">
+          <span class="orb__glow"></span>
+          <span class="orb__ring r1"></span><span class="orb__ring r2"></span>
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/The%20Earth%20seen%20from%20Apollo%2017.jpg?width=800" alt="" loading="eager" />
+          <span class="orb__label">Earth<span class="orb__stat">1.00&nbsp;g</span></span>
+          <span class="orb__sat s1"></span>
+        </div>
+        <div class="orb orb--mars" data-depth="1.4">
+          <span class="orb__glow"></span>
+          <span class="orb__ring r1"></span>
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/OSIRIS%20Mars%20true%20color.jpg?width=800" alt="" loading="eager" />
+          <span class="orb__label">Mars<span class="orb__stat">0.38&nbsp;g</span></span>
+          <span class="orb__sat s2"></span>
+        </div>
+        <div class="orb orb--moon" data-depth="0.6">
+          <span class="orb__glow"></span>
+          <span class="orb__ring r1"></span>
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/FullMoon2010.jpg?width=800" alt="" loading="eager" />
+          <span class="orb__label">Moon<span class="orb__stat">0.17&nbsp;g</span></span>
+        </div>
+        <div class="hero__chip chip--a">◉ SOL 1147 · GALE CRATER −63°C</div>
+        <div class="hero__chip chip--b">✦ SIGNAL LOCK · DSN 34M</div>
+        <div class="hero__chip chip--c">▲ 384,400 KM · LUNAR RANGE</div>
+      </div>
+
+      <a class="hero__scroll" href="#worlds" aria-label="Scroll to explore">
+        <span>Scroll</span>
+        <span class="hero__scroll-line" aria-hidden="true"></span>
+      </a>
+    </section>
+
+    <!-- TICKER -->
+    <div class="ticker" aria-hidden="true">
+      <div class="ticker__track" id="tickerTrack">
+        <span>ATACAMA ✦ DRY VALLEYS ✦ HAUGHTON ✦ TIMANFAYA ✦ RÍO TINTO ✦ CRATERS OF THE MOON ✦ METEOR CRATER ✦ MAUNA KEA ✦ ASKJA ✦ LAVA BEDS ✦&nbsp;</span>
+        <span>ATACAMA ✦ DRY VALLEYS ✦ HAUGHTON ✦ TIMANFAYA ✦ RÍO TINTO ✦ CRATERS OF THE MOON ✦ METEOR CRATER ✦ MAUNA KEA ✦ ASKJA ✦ LAVA BEDS ✦&nbsp;</span>
+      </div>
+    </div>
+
+    <!-- THE THREE WORLDS -->
+    <section class="section worlds" id="worlds">
+      <div class="ghost" aria-hidden="true">01</div>
+      <div class="section__head reveal">
+        <p class="kicker"><span class="kicker__dot"></span>SYSTEM MAP · 01 — THE WORLDS</p>
+        <h2 class="section__title">Three worlds, <span class="grad grad--fire">one neighbourhood.</span></h2>
+        <p class="section__lede">The same rock and dust, spun at different scales. Here are the numbers that separate them.</p>
+      </div>
+
+      <div class="worlds__grid">
+        <article class="world world--earth reveal tilt" style="--planet: var(--earth)">
+          <div class="card-shine" aria-hidden="true"></div>
+          <div class="world__top">
+            <img class="world__img" src="https://commons.wikimedia.org/wiki/Special:FilePath/The%20Earth%20seen%20from%20Apollo%2017.jpg?width=1200" alt="Earth seen from space, the Blue Marble photograph" loading="lazy" />
+            <span class="world__tag">● Home</span>
+            <span class="world__index">E.01</span>
+          </div>
+          <h3 class="world__name">Earth</h3>
+          <p class="world__desc">A living world of oceans, clouds and life, the only place we know where it all came together.</p>
+          <dl class="world__stats">
+            <div><dt>Diameter</dt><dd>12,742&nbsp;km</dd></div>
+            <div><dt>Gravity</dt><dd>1.00&nbsp;g</dd></div>
+            <div><dt>Mean temp</dt><dd>15&nbsp;°C</dd></div>
+            <div><dt>Day / year</dt><dd>24&nbsp;h · 365&nbsp;d</dd></div>
+            <div><dt>From Earth</dt><dd>Home</dd></div>
+            <div><dt>Moons</dt><dd>1</dd></div>
+          </dl>
+        </article>
+
+        <article class="world world--mars reveal tilt" style="--planet: var(--mars)">
+          <div class="card-shine" aria-hidden="true"></div>
+          <div class="world__top">
+            <img class="world__img" src="https://commons.wikimedia.org/wiki/Special:FilePath/OSIRIS%20Mars%20true%20color.jpg?width=1200" alt="The full disc of Mars in true colour" loading="lazy" />
+            <span class="world__tag">● The red one</span>
+            <span class="world__index">M.02</span>
+          </div>
+          <h3 class="world__name">Mars</h3>
+          <p class="world__desc">A cold desert world, rusted red by iron oxide. It once held rivers and may hide water ice today.</p>
+          <dl class="world__stats">
+            <div><dt>Diameter</dt><dd>6,779&nbsp;km</dd></div>
+            <div><dt>Gravity</dt><dd>0.38&nbsp;g</dd></div>
+            <div><dt>Mean temp</dt><dd>−63&nbsp;°C</dd></div>
+            <div><dt>Day / year</dt><dd>24.6&nbsp;h · 687&nbsp;d</dd></div>
+            <div><dt>From Earth</dt><dd>~225M&nbsp;km</dd></div>
+            <div><dt>Moons</dt><dd>2</dd></div>
+          </dl>
+        </article>
+
+        <article class="world world--moon reveal tilt" style="--planet: var(--moon)">
+          <div class="card-shine" aria-hidden="true"></div>
+          <div class="world__top">
+            <img class="world__img" src="https://commons.wikimedia.org/wiki/Special:FilePath/FullMoon2010.jpg?width=1200" alt="The full Moon" loading="lazy" />
+            <span class="world__tag">● Nearest neighbour</span>
+            <span class="world__index">L.03</span>
+          </div>
+          <h3 class="world__name">The Moon</h3>
+          <p class="world__desc">A still, grey world of ancient lava plains and craters, locked in orbit around Earth.</p>
+          <dl class="world__stats">
+            <div><dt>Diameter</dt><dd>3,474&nbsp;km</dd></div>
+            <div><dt>Gravity</dt><dd>0.17&nbsp;g</dd></div>
+            <div><dt>Mean temp</dt><dd>−20&nbsp;°C</dd></div>
+            <div><dt>Rotation</dt><dd>27.3&nbsp;d</dd></div>
+            <div><dt>From Earth</dt><dd>384,400&nbsp;km</dd></div>
+            <div><dt>Moons</dt><dd>0</dd></div>
+          </dl>
+        </article>
+      </div>
+
+      <div class="gravity reveal" aria-label="Surface gravity compared with Earth">
+        <div class="gravity__head">
+          <span>◉ Surface gravity</span>
+          <span class="mono">relative to Earth</span>
+        </div>
+        <div class="gravity__row" style="--w: 100%; --planet: var(--earth); --d: 0ms">
+          <span class="gravity__name">Earth</span>
+          <span class="gravity__track"><span class="gravity__fill"></span><span class="gravity__spark"></span></span>
+          <span class="gravity__val">1.00&nbsp;g</span>
+        </div>
+        <div class="gravity__row" style="--w: 38%; --planet: var(--mars); --d: 120ms">
+          <span class="gravity__name">Mars</span>
+          <span class="gravity__track"><span class="gravity__fill"></span><span class="gravity__spark"></span></span>
+          <span class="gravity__val">0.38&nbsp;g</span>
+        </div>
+        <div class="gravity__row" style="--w: 17%; --planet: var(--moon); --d: 240ms">
+          <span class="gravity__name">Moon</span>
+          <span class="gravity__track"><span class="gravity__fill"></span><span class="gravity__spark"></span></span>
+          <span class="gravity__val">0.17&nbsp;g</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider" aria-hidden="true"><span></span><em>✦ TRANSMISSION 01 · STABLE ✦</em><span></span></div>
+
+    <!-- FIDELITY EXPLAINER -->
+    <section class="section fidelity" id="fidelity">
+      <div class="ghost" aria-hidden="true">02</div>
+      <div class="section__head reveal">
+        <p class="kicker"><span class="kicker__dot"></span>FIDELITY INDEX · 02 — HOW CLOSE IS “CLOSE”?</p>
+        <h2 class="section__title">How close is <span class="grad grad--ice">“close”?</span></h2>
+        <p class="section__lede">Scientists grade an analogue on four things. A site can be a near-perfect match on one and a poor one on another.</p>
+      </div>
+
+      <div class="fidelity__grid">
+        <article class="pillar reveal tilt">
+          <div class="card-shine" aria-hidden="true"></div>
+          <span class="pillar__num">F.01</span>
+          <svg class="pillar__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 19l6-11 4 7 3-4 5 8z" /><path d="M3 19h18" /></svg>
+          <h3>Landform</h3>
+          <p>Dunes, craters, lava tubes and polygons that match the shapes found on another world.</p>
+          <span class="pillar__bar"><i style="--p:92%"></i></span>
+        </article>
+        <article class="pillar reveal tilt">
+          <div class="card-shine" aria-hidden="true"></div>
+          <span class="pillar__num">F.02</span>
+          <svg class="pillar__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 4v10l-7 4-7-4V7z" /><circle cx="12" cy="12" r="2.4" /></svg>
+          <h3>Chemistry</h3>
+          <p>Acidic brines, iron oxides and sulphates that echo the minerals found on Mars.</p>
+          <span class="pillar__bar"><i style="--p:78%"></i></span>
+        </article>
+        <article class="pillar reveal tilt">
+          <div class="card-shine" aria-hidden="true"></div>
+          <span class="pillar__num">F.03</span>
+          <svg class="pillar__icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="12" r="3" /><circle cx="15.5" cy="9" r="2" /><circle cx="16" cy="16" r="2.4" /></svg>
+          <h3>Life</h3>
+          <p>Extremophiles and stromatolites that hint at how life could cling on elsewhere.</p>
+          <span class="pillar__bar"><i style="--p:64%"></i></span>
+        </article>
+        <article class="pillar reveal tilt">
+          <div class="card-shine" aria-hidden="true"></div>
+          <span class="pillar__num">F.04</span>
+          <svg class="pillar__icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" /><circle cx="12" cy="12" r="2" /><path d="M12 2v4M12 18v4M2 12h4M18 12h4" /></svg>
+          <h3>Operations</h3>
+          <p>Isolation, communication delay and suit work that rehearse a real mission.</p>
+          <span class="pillar__bar"><i style="--p:85%"></i></span>
+        </article>
+      </div>
+
+      <div class="reality reveal">
+        <div class="reality__intro">
+          <span class="eyebrow">⚠ Reality check</span>
+          <h3>What Earth always gives away</h3>
+          <p>Every analogue shares one problem: it is still Earth. These four differences are what make the real thing so hard.</p>
+        </div>
+        <ul class="reality__list">
+          <li><span>Air</span> A thick nitrogen-oxygen atmosphere that Mars and the Moon do not have.</li>
+          <li><span>Water</span> Liquid water, ice and rain, even in the driest deserts.</li>
+          <li><span>Gravity</span> 1&nbsp;g here, versus 0.38&nbsp;g on Mars and 0.17&nbsp;g on the Moon.</li>
+          <li><span>Life</span> Microbes, lichens and roots that colonise even extreme sites.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- MARS ON EARTH -->
+    <section class="section analogs" id="mars">
+      <div class="ghost" aria-hidden="true">03</div>
+      <div class="section__head reveal">
+        <p class="kicker kicker--mars"><span class="kicker__dot"></span>RED ZONE · 03 — MARS ON EARTH</p>
+        <h2 class="section__title">Mars, <span class="grad grad--fire">already on Earth.</span></h2>
+        <p class="section__lede">Six places where the ground, the chemistry or the isolation rehearses the Red Planet.</p>
+      </div>
+
+      <div class="analogs__grid">
+        <article class="card card--site reveal tilt" data-planet="mars">
+          <div class="card-shine" aria-hidden="true"></div>
+          <div class="card__media">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Anfiteatro%2C_Valle_de_la_Luna%2C_San_Pedro_de_Atacama%2C_Chile%2C_2016-02-01%2C_DD_149.JPG/1280px-Anfiteatro%2C_Valle_de_la_Luna%2C_San_Pedro_de_Atacama%2C_Chile%2C_2016-02-01%2C_DD_149.JPG" alt="Bare banded hills in the Atacama desert, Chile" loading="lazy" />
+            <span class="card__planet">◉ Mars analogue</span>
+            <span class="card__coord">22.9°S · 68.2°W</span>
+          </div>
+          <div class="card__body">
+            <div class="card__meta"><span class="card__country">Chile</span><span class="card__type">Hyperarid · Rover testing</span></div>
+            <h3 class="card__title">Atacama Desert</h3>
+            <p class="card__text">The driest non-polar desert on Earth. Instruments for Viking, Phoenix and ExoMars were tested in its Mars-like soils.</p>
+            <p class="card__reality"><b>Reality check</b> Still has an oxygen atmosphere and rare rain.</p>
+            <p class="card__source">ESA Catalogue · ch. 2</p>
+          </div>
+        </article>
+
+        <article class="card card--site reveal tilt" data-planet="mars">
+          <div class="card-shine" aria-hidden="true"></div>
+          <div class="card__media">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Gargoyle_Ridge_in_the_McMurdo_Dry_Valleys_in_Antarctica_%2830877661786%29.jpg/1280px-Gargoyle_Ridge_in_the_McMurdo_Dry_Valleys_in_Antarctica_%2830877661786%29.jpg" alt="Bare rocky ridge in the McMurdo Dry Valleys, Antarctica" loading="lazy" />
+            <span class="card__planet">◉ Mars analogue</span>
+            <span class="card__coord">77.5°S · 162.3°E</span>
+          </div>
+          <div class="card__body">
+            <div class="card__meta"><span class="card__country">Antarctica</span><span class="card__type">Cold desert · Astrobiology</span></div>
+            <h3 class="card__title">McMurdo Dry Valleys</h3>
+            <p class="card__text">Snow-free valleys that may not have seen rain for millions of years. Blood Falls stains the ice red with iron-rich brine.</p>
+            <p class="card__reality"><b>Reality check</b> Summer meltwater and an oxygen atmosphere.</p>
+            <p class="card__source">ESA Catalogue · ch. 1</p>
+          </div>
+        </article>
+
+        <article class="card card--site reveal tilt" data-planet="mars">
+          <div class="card-shine" aria-hidden="true"></div>
+          <div class="card__media">
+            <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/7/70/Flying_over_Devon_Island_%282665527817%29.jpg/1280px-Flying_over_Devon_Island_%282665527817%29.jpg" alt="Aerial view of the barren Devon Island, Canada" loading="lazy" />
+            <span class="card__planet">◉ Mars analogue</span>
+            <span class="card__coord">75.4°N · 89.7°W</span>
+          </div>
+          <div class="card__body">
+            <div class="card__meta"><span class="card__country">Canada</span><span class="card__type">Impact · Isolation</span></div>
+            <h3 class="card__title">Haughton Crater, Devon Island</h3>
+            <p class="card__text">A 23&nbsp;km impact structure in a polar desert. NASA’s Haughton-Mars Project tests habitats and communication delay here.</p>
+            <p class="card__reality"><b>Reality check</b> Earth gravity and slow polar weathering.</p>
+            <p class="card__source">ESA Catalogue · ch. 10</p>
+          </div>
+        </article>
+
+        <article class="card card--site reveal tilt" data-planet="mars">
+          <div class="card-shine" aria-hidden="true"></div>
+          <div class="card__media">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Artemis_II_Crew_geology_training_in_Iceland_-_jsc2024e055198.jpg/1280px-Artemis_II_Crew_geology_training_in_Iceland_-_jsc2024e055198.jpg" alt="Astronauts training on dark volcanic rock in Iceland" loading="lazy" />
+            <span class="card__planet">◉ Mars analogue</span>
+            <span class="card__coord">64.9°N · 19.0°W</span>
+          </div>
+          <div class="card__body">
+            <div class="card__meta"><span class="card__country">Iceland</span><span class="card__type">Volcanic · Rover testing</span></div>
+            <h3 class="card__title">Holuhraun &amp; Krafla</h3>
+            <p class="card__text">Fissure-fed lava fields and altered basalt. Apollo crews trained here, and a Mars 2020 rover prototype was tested in 2019.</p>
+            <p class="card__reality"><b>Reality check</b> Active ice and water, and an atmosphere.</p>
+            <p class="card__source">ESA Catalogue · ch. 12</p>
+          </div>
+        </article>
+
+        <article class="card card--site reveal tilt" data-planet="mars">
+          <div class="card-shine" aria-hidden="true"></div>
+          <div class="card__media">
+            <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/7/72/Timanfaya_-_Lanzarote_02.jpg/1280px-Timanfaya_-_Lanzarote_02.jpg" alt="Dark volcanic terrain of Timanfaya, Lanzarote" loading="lazy" />
+            <span class="card__planet">◉ Mars analogue</span>
+            <span class="card__coord">29.0°N · 13.6°W</span>
+          </div>
+          <div class="card__body">
+            <div class="card__meta"><span class="card__country">Spain</span><span class="card__type">Volcanic · Lava tubes</span></div>
+            <h3 class="card__title">Timanfaya, Lanzarote</h3>
+            <p class="card__text">Pristine 18th-century lava and tubes. ESA’s Pangaea course trains astronauts in field geology on this island.</p>
+            <p class="card__reality"><b>Reality check</b> An atmosphere and vegetation nearby.</p>
+            <p class="card__source">ESA Pangaea · Planetary Analogue Catalogue</p>
+          </div>
+        </article>
+
+        <article class="card card--site reveal tilt" data-planet="mars">
+          <div class="card-shine" aria-hidden="true"></div>
+          <div class="card__media">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/IronInRocksMakeRiverRed.jpg/1280px-IronInRocksMakeRiverRed.jpg" alt="The red, iron-rich water of the Rio Tinto in Spain" loading="lazy" />
+            <span class="card__planet">◉ Mars analogue</span>
+            <span class="card__coord">37.7°N · 6.6°W</span>
+          </div>
+          <div class="card__body">
+            <div class="card__meta"><span class="card__country">Spain</span><span class="card__type">Mineralogical · Astrobiology</span></div>
+            <h3 class="card__title">Río Tinto</h3>
+            <p class="card__text">An acidic, iron-rich river precipitating jarosite and hematite, minerals also found at Meridiani Planum on Mars.</p>
+            <p class="card__reality"><b>Reality check</b> The acidity comes from pyrite mining runoff, not Martian groundwater.</p>
+            <p class="card__source">ESA Catalogue · ch. 23</p>
+          </div>
+        </article>
+      </div>
+
+      <div class="pills reveal" aria-label="More Mars analogues">
+        <span class="pills__label">Also used</span>
+        <span class="pill">Dallol, Ethiopia</span>
+        <span class="pill">Svalbard, Norway</span>
+        <span class="pill">Tenerife, Spain</span>
+        <span class="pill">Pilbara, Australia</span>
+        <span class="pill">Namib, Namibia</span>
+        <span class="pill">Utah, USA</span>
+        <span class="pill">Boulby, UK</span>
+      </div>
+    </section>
+
+    <!-- MOON ON EARTH -->
+    <section class="section analogs analogs--strip" id="moon">
+      <div class="ghost" aria-hidden="true">04</div>
+      <div class="section__head reveal">
+        <p class="kicker kicker--moon"><span class="kicker__dot"></span>GREY ZONE · 04 — MOON ON EARTH</p>
+        <h2 class="section__title">Moon, <span class="grad grad--moon">rehearsed on Earth.</span></h2>
+        <p class="section__lede">Grey lava, cinder and impact craters, the ground astronauts walked before they ever left orbit. <span class="drag-hint">⟵ drag sideways ⟶</span></p>
+      </div>
+
+      <div class="strip" tabindex="0" aria-label="Moon analogue locations, scroll sideways">
+        <article class="card card--site reveal tilt" data-planet="moon">
+          <div class="card-shine" aria-hidden="true"></div>
+          <div class="card__media">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Cinder_cone_complex_%28Holocene%2C_~2.4_ka%3B_Big_Craters%2C_Craters_of_the_Moon_Lava_Field%2C_Snake_River_Plain%2C_Idaho%2C_USA%29_7.jpg/1280px-Cinder_cone_complex_%28Holocene%2C_~2.4_ka%3B_Big_Craters%2C_Craters_of_the_Moon_Lava_Field%2C_Snake_River_Plain%2C_Idaho%2C_USA%29_7.jpg" alt="Black cinder cones of Craters of the Moon, Idaho" loading="lazy" />
+            <span class="card__planet">◐ Moon analogue</span>
+            <span class="card__coord">43.4°N · 113.5°W</span>
+          </div>
+          <div class="card__body">
+            <div class="card__meta"><span class="card__country">USA</span><span class="card__type">Volcanic · Apollo training</span></div>
+            <h3 class="card__title">Craters of the Moon, Idaho</h3>
+            <p class="card__text">A sea of young basalt. Apollo 14 astronauts trained here to read volcanic terrain before walking on the Moon.</p>
+            <p class="card__reality"><b>Reality check</b> Earth gravity and a thin atmosphere.</p>
+            <p class="card__source">National Park Service · mission history</p>
+          </div>
+        </article>
+
+        <article class="card card--site reveal tilt" data-planet="moon">
+          <div class="card-shine" aria-hidden="true"></div>
+          <div class="card__media">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/0/03/Cinder_Lake_Crater_Field_1.jpg" alt="The man-made Cinder Lake crater field in Arizona" loading="lazy" />
+            <span class="card__planet">◐ Moon analogue</span>
+            <span class="card__coord">35.3°N · 111.5°W</span>
+          </div>
+          <div class="card__body">
+            <div class="card__meta"><span class="card__country">USA</span><span class="card__type">Impact · Apollo training</span></div>
+            <h3 class="card__title">Cinder Lake Crater Field</h3>
+            <p class="card__text">A crater field built in the 1960s from a Lunar Orbiter image, so Apollo crews could practise on the ground.</p>
+            <p class="card__reality"><b>Reality check</b> Man-made, and far smaller than lunar crater fields.</p>
+            <p class="card__source">ESA Catalogue · ch. 7</p>
+          </div>
+        </article>
+
+        <article class="card card--site reveal tilt" data-planet="moon">
+          <div class="card-shine" aria-hidden="true"></div>
+          <div class="card__media">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/2019_Meteor_Crater%2C_Arizona.jpg/1280px-2019_Meteor_Crater%2C_Arizona.jpg" alt="The vast bowl of Meteor Crater in Arizona" loading="lazy" />
+            <span class="card__planet">◐ Moon analogue</span>
+            <span class="card__coord">35.0°N · 111.0°W</span>
+          </div>
+          <div class="card__body">
+            <div class="card__meta"><span class="card__country">USA</span><span class="card__type">Impact · Geology training</span></div>
+            <h3 class="card__title">Meteor Crater, Arizona</h3>
+            <p class="card__text">A 1.2&nbsp;km bowl roughly 50,000 years old. Astronauts studied impact geology here before the Apollo missions.</p>
+            <p class="card__reality"><b>Reality check</b> Earth gravity and weathering.</p>
+            <p class="card__source">ESA Catalogue · ch. 16</p>
+          </div>
+        </article>
+
+        <article class="card card--site reveal tilt" data-planet="moon">
+          <div class="card-shine" aria-hidden="true"></div>
+          <div class="card__media">
+            <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/d/de/Mauna_Kea_Summit_%28503893%29_%2821743654782%29.jpg/1280px-Mauna_Kea_Summit_%28503893%29_%2821743654782%29.jpg" alt="Barren volcanic summit of Mauna Kea, Hawaii" loading="lazy" />
+            <span class="card__planet">◐ Moon analogue</span>
+            <span class="card__coord">19.8°N · 155.5°W</span>
+          </div>
+          <div class="card__body">
+            <div class="card__meta"><span class="card__country">USA</span><span class="card__type">Volcanic · Instrument testing</span></div>
+            <h3 class="card__title">Mauna Kea, Hawaii</h3>
+            <p class="card__text">Apollo astronauts trained on these cinder slopes. NASA later tested lunar instruments and ISRU equipment here.</p>
+            <p class="card__reality"><b>Reality check</b> An atmosphere, water, and cultural access limits.</p>
+            <p class="card__source">Planetary Analogue Catalogue</p>
+          </div>
+        </article>
+
+        <article class="card card--site reveal tilt" data-planet="moon">
+          <div class="card-shine" aria-hidden="true"></div>
+          <div class="card__media">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Viti_Crater_Askja_Iceland_UL1.jpg" alt="The blue crater lake of Askja, Iceland" loading="lazy" />
+            <span class="card__planet">◐ Moon analogue</span>
+            <span class="card__coord">65.0°N · 16.7°W</span>
+          </div>
+          <div class="card__body">
+            <div class="card__meta"><span class="card__country">Iceland</span><span class="card__type">Volcanic · Apollo training</span></div>
+            <h3 class="card__title">Askja &amp; Lambahraun</h3>
+            <p class="card__text">Black sands and craters where Apollo 11 and 12 crews learned field geology in the 1960s.</p>
+            <p class="card__reality"><b>Reality check</b> Ice, water and an atmosphere.</p>
+            <p class="card__source">ESA Catalogue · ch. 12</p>
+          </div>
+        </article>
+
+        <article class="card card--site reveal tilt" data-planet="moon">
+          <div class="card-shine" aria-hidden="true"></div>
+          <div class="card__media">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/A114%2C_Lava_Beds_National_Monument%2C_California%2C_USA%2C_Golden_Dome_Lava_Tube_Cave%2C_2004.jpg/1280px-A114%2C_Lava_Beds_National_Monument%2C_California%2C_USA%2C_Golden_Dome_Lava_Tube_Cave%2C_2004.jpg" alt="A lava tube cave in Lava Beds National Monument, California" loading="lazy" />
+            <span class="card__planet">◐ Moon analogue</span>
+            <span class="card__coord">41.7°N · 121.5°W</span>
+          </div>
+          <div class="card__body">
+            <div class="card__meta"><span class="card__country">USA</span><span class="card__type">Lava tubes · Modelling</span></div>
+            <h3 class="card__title">Lava Beds National Monument</h3>
+            <p class="card__text">Basaltic tubes and skylights used to model how lunar lava tubes could be mapped and eventually built in.</p>
+            <p class="card__reality"><b>Reality check</b> Terrestrial tubes are about 30&nbsp;m wide, far smaller than lunar ones.</p>
+            <p class="card__source">Planetary Analogue Catalogue</p>
+          </div>
+        </article>
+      </div>
+
+      <div class="pills reveal" aria-label="More Moon analogues">
+        <span class="pills__label">Also used</span>
+        <span class="pill">Lanzarote, Spain</span>
+        <span class="pill">Haleakala, Hawaii</span>
+        <span class="pill">Pisgah Crater, California</span>
+        <span class="pill">Lonar Crater, India</span>
+        <span class="pill">Mistastin Lake, Canada</span>
+        <span class="pill">Sudbury, Canada</span>
+      </div>
+    </section>
+
+    <!-- COMPARISON SLIDERS -->
+    <section class="section compare" id="compare">
+      <div class="ghost" aria-hidden="true">05</div>
+      <div class="section__head reveal">
+        <p class="kicker"><span class="kicker__dot"></span>TWIN SCANNER · 05 — DRAG TO SEE THE TWIN</p>
+        <h2 class="section__title">Drag to see <span class="grad grad--hyper">the twin.</span></h2>
+        <p class="section__lede">Slide between an Earth landscape and the world it stands in for. Same dust, different planet.</p>
+      </div>
+
+      <div class="compare__list">
+        <div class="compare__item reveal">
+          <div class="compare__frame" data-compare style="--pos: 50%">
+            <img class="compare__img" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Curiosity_Captures_Mars_Landscape_While_Talking_to_an_Orbiter_%28PIA26632%29.jpg/1280px-Curiosity_Captures_Mars_Landscape_While_Talking_to_an_Orbiter_%28PIA26632%29.jpg" alt="The rocky landscape of Mars, photographed by the Curiosity rover" loading="lazy" draggable="false" />
+            <div class="compare__before">
+              <img class="compare__img" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Anfiteatro%2C_Valle_de_la_Luna%2C_San_Pedro_de_Atacama%2C_Chile%2C_2016-02-01%2C_DD_149.JPG/1280px-Anfiteatro%2C_Valle_de_la_Luna%2C_San_Pedro_de_Atacama%2C_Chile%2C_2016-02-01%2C_DD_149.JPG" alt="Valle de la Luna in Chile, an Earth analogue for Mars" loading="lazy" draggable="false" />
+              <span class="compare__label compare__label--a">◉ Atacama · Earth</span>
+            </div>
+            <span class="compare__label compare__label--b">✦ Gale Crater · Mars</span>
+            <button class="compare__handle" type="button" role="slider" aria-label="Comparison slider, drag to compare Earth and Mars" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-orientation="horizontal">
+              <span class="compare__grip" aria-hidden="true"></span>
+            </button>
+          </div>
+          <p class="compare__caption">Chile’s Atacama versus the real surface of Mars. <span>Used by NASA and ESA for rover testing.</span></p>
+        </div>
+
+        <div class="compare__item reveal">
+          <div class="compare__frame" data-compare style="--pos: 50%">
+            <img class="compare__img" src="https://commons.wikimedia.org/wiki/Special:FilePath/Aldrin%20Apollo%2011%20original.jpg?width=1600" alt="Astronaut Buzz Aldrin standing on the lunar surface" loading="lazy" draggable="false" />
+            <div class="compare__before">
+              <img class="compare__img" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Cinder_cone_complex_%28Holocene%2C_~2.4_ka%3B_Big_Craters%2C_Craters_of_the_Moon_Lava_Field%2C_Snake_River_Plain%2C_Idaho%2C_USA%29_7.jpg/1280px-Cinder_cone_complex_%28Holocene%2C_~2.4_ka%3B_Big_Craters%2C_Craters_of_the_Moon_Lava_Field%2C_Snake_River_Plain%2C_Idaho%2C_USA%29_7.jpg" alt="Grey volcanic cinder field in Idaho, an Earth analogue for the Moon" loading="lazy" draggable="false" />
+              <span class="compare__label compare__label--a">◉ Idaho · Earth</span>
+            </div>
+            <span class="compare__label compare__label--b">◐ Apollo 11 · Moon</span>
+            <button class="compare__handle" type="button" role="slider" aria-label="Comparison slider, drag to compare Earth and the Moon" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-orientation="horizontal">
+              <span class="compare__grip" aria-hidden="true"></span>
+            </button>
+          </div>
+          <p class="compare__caption">Idaho’s volcanic cinders versus the surface of the Moon. <span>Apollo 14 trained on this lava field.</span></p>
+        </div>
+
+        <div class="compare__item reveal">
+          <div class="compare__frame" data-compare style="--pos: 50%">
+            <img class="compare__img" src="https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9a/PIA16453-MarsCuriosityRover-RocknestPanorama-20121126.jpg/1280px-PIA16453-MarsCuriosityRover-RocknestPanorama-20121126.jpg" alt="A rocky Mars panorama from the Curiosity rover at Rocknest" loading="lazy" draggable="false" />
+            <div class="compare__before">
+              <img class="compare__img" src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/IronInRocksMakeRiverRed.jpg/1280px-IronInRocksMakeRiverRed.jpg" alt="The red, iron-rich water of the Rio Tinto in Spain" loading="lazy" draggable="false" />
+              <span class="compare__label compare__label--a">◉ Río Tinto · Earth</span>
+            </div>
+            <span class="compare__label compare__label--b">✦ Rocknest · Mars</span>
+            <button class="compare__handle" type="button" role="slider" aria-label="Comparison slider, drag to compare the Rio Tinto and Mars" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-orientation="horizontal">
+              <span class="compare__grip" aria-hidden="true"></span>
+            </button>
+          </div>
+          <p class="compare__caption">An acid river in Spain versus the iron-rich ground of Mars. <span>Both precipitate jarosite and hematite.</span></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- LOOKALIKES -->
+    <section class="section lookalikes" id="lookalikes">
+      <div class="ghost" aria-hidden="true">06</div>
+      <div class="section__head reveal">
+        <p class="kicker"><span class="kicker__dot"></span>DOPPELGÄNGERS · 06 — PURE RESEMBLANCE</p>
+        <h2 class="section__title">The <span class="grad grad--vice">lookalikes.</span></h2>
+        <p class="section__lede">Not every “alien” landscape is a scientific analogue. These are chosen purely for the resemblance, and a few are a little artistic license.</p>
+      </div>
+
+      <div class="lookalikes__grid">
+        <article class="look reveal tilt">
+          <div class="card-shine" aria-hidden="true"></div>
+          <div class="look__media">
+            <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0c/Bardenas_Reales%2C_Navarra%2C_Espa%C3%B1a%2C_2015-01-06%2C_DD_01.JPG/1280px-Bardenas_Reales%2C_Navarra%2C_Espa%C3%B1a%2C_2015-01-06%2C_DD_01.JPG" alt="Eroded badlands of Bardenas Reales, Spain" loading="lazy" />
+            <span class="look__tag">✦ Visual lookalike</span>
+          </div>
+          <div class="look__body"><h3>Bardenas Reales</h3><p>Spain · eroded badlands</p></div>
+        </article>
+        <article class="look reveal tilt">
+          <div class="card-shine" aria-hidden="true"></div>
+          <div class="look__media">
+            <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b6/Utah_-_North_America_-_Goblin_Valley_State_Park_-_Hoodoos_%284892233345%29.jpg/1280px-Utah_-_North_America_-_Goblin_Valley_State_Park_-_Hoodoos_%284892233345%29.jpg" alt="Hoodoo rock formations in Goblin Valley, Utah" loading="lazy" />
+            <span class="look__tag">✦ Visual lookalike</span>
+          </div>
+          <div class="look__body"><h3>Goblin Valley</h3><p>Utah, USA · hoodoos</p></div>
+        </article>
+        <article class="look reveal tilt">
+          <div class="card-shine" aria-hidden="true"></div>
+          <div class="look__media">
+            <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cd/Sarakiniko_Beach_on_Milos_Island%2C_Greece_with_a_view_of_the_Aegean_Sea.jpg/1280px-Sarakiniko_Beach_on_Milos_Island%2C_Greece_with_a_view_of_the_Aegean_Sea.jpg" alt="White volcanic rock at Sarakiniko, Milos, Greece" loading="lazy" />
+            <span class="look__tag">✦ Visual lookalike</span>
+          </div>
+          <div class="look__body"><h3>Sarakiniko</h3><p>Milos, Greece · white volcanic rock</p></div>
+        </article>
+        <article class="look reveal tilt">
+          <div class="card-shine" aria-hidden="true"></div>
+          <div class="look__media">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/e/e8/A369%2C_Pinnacles_Desert%2C_Nambung_National_Park%2C_Western_Australia%2C_2007.JPG" alt="Limestone pillars in the Pinnacles Desert, Western Australia" loading="lazy" />
+            <span class="look__tag">✦ Visual lookalike</span>
+          </div>
+          <div class="look__body"><h3>The Pinnacles</h3><p>Western Australia · limestone pillars</p></div>
+        </article>
+        <article class="look reveal tilt">
+          <div class="card-shine" aria-hidden="true"></div>
+          <div class="look__media">
+            <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c9/Rummu_Quarry.jpg/1280px-Rummu_Quarry.jpg" alt="The flooded Rummu quarry in Estonia" loading="lazy" />
+            <span class="look__tag">✦ Visual lookalike</span>
+          </div>
+          <div class="look__body"><h3>Rummu Quarry</h3><p>Estonia · flooded limestone quarry</p></div>
+        </article>
+        <article class="look reveal tilt">
+          <div class="card-shine" aria-hidden="true"></div>
+          <div class="look__media">
+            <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Osoyoos_-_Spotted_Lake_%284762813753%29.jpg/1280px-Osoyoos_-_Spotted_Lake_%284762813753%29.jpg" alt="Mineral pools of Spotted Lake, Canada" loading="lazy" />
+            <span class="look__tag">✦ Visual lookalike</span>
+          </div>
+          <div class="look__body"><h3>Spotted Lake</h3><p>British Columbia, Canada · mineral pools</p></div>
+        </article>
+      </div>
+      <p class="lookalikes__note reveal">A scientific analogue is chosen for its geology, chemistry or mission value. A lookalike is chosen for its photograph.</p>
+    </section>
+
+    <!-- GALLERY -->
+    <section class="section gallery" id="gallery">
+      <div class="ghost" aria-hidden="true">07</div>
+      <div class="section__head reveal">
+        <p class="kicker"><span class="kicker__dot"></span>FIELD NOTES · 07 — SIGNAL ARCHIVE</p>
+        <h2 class="section__title">Field <span class="grad grad--ice">notes.</span></h2>
+        <p class="section__lede">A few frames from the three worlds. Filter by world, then click any to look closer.</p>
+      </div>
+
+      <div class="filters reveal" role="group" aria-label="Filter gallery by world">
+        <button class="filter is-active magnetic" type="button" data-filter="all">All ✦</button>
+        <button class="filter magnetic" type="button" data-filter="earth">◉ Earth</button>
+        <button class="filter magnetic" type="button" data-filter="mars">✦ Mars</button>
+        <button class="filter magnetic" type="button" data-filter="moon">◐ Moon</button>
+      </div>
+
+      <div class="gallery__grid" id="galleryGrid">
+        <figure class="gallery__item gallery__item--wide reveal" data-cat="earth" data-caption="Wadi Rum, Jordan · Earth, but filmed as Mars in The Martian">
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Wadi%20Rum%2C%20Jordan.jpg?width=1600" alt="Red sandstone desert of Wadi Rum, Jordan" loading="lazy" />
+        </figure>
+        <figure class="gallery__item reveal" data-cat="mars" data-caption="Mars in true colour · OSIRIS">
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/OSIRIS%20Mars%20true%20color.jpg?width=1200" alt="Mars full disc" loading="lazy" />
+        </figure>
+        <figure class="gallery__item reveal" data-cat="moon" data-caption="The full Moon">
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/FullMoon2010.jpg?width=1200" alt="The full Moon" loading="lazy" />
+        </figure>
+        <figure class="gallery__item gallery__item--tall reveal" data-cat="earth" data-caption="Valle de la Luna, Atacama, Chile · a Mars analogue">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Anfiteatro%2C_Valle_de_la_Luna%2C_San_Pedro_de_Atacama%2C_Chile%2C_2016-02-01%2C_DD_149.JPG/1280px-Anfiteatro%2C_Valle_de_la_Luna%2C_San_Pedro_de_Atacama%2C_Chile%2C_2016-02-01%2C_DD_149.JPG" alt="Valle de la Luna, Chile" loading="lazy" />
+        </figure>
+        <figure class="gallery__item reveal" data-cat="earth" data-caption="McMurdo Dry Valleys, Antarctica · the most Mars-like place on Earth">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Gargoyle_Ridge_in_the_McMurdo_Dry_Valleys_in_Antarctica_%2830877661786%29.jpg/1280px-Gargoyle_Ridge_in_the_McMurdo_Dry_Valleys_in_Antarctica_%2830877661786%29.jpg" alt="McMurdo Dry Valleys" loading="lazy" />
+        </figure>
+        <figure class="gallery__item gallery__item--wide reveal" data-cat="earth" data-caption="Devon Island, Canada · Haughton impact structure and the Haughton-Mars Project">
+          <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/7/70/Flying_over_Devon_Island_%282665527817%29.jpg/1280px-Flying_over_Devon_Island_%282665527817%29.jpg" alt="Devon Island from the air" loading="lazy" />
+        </figure>
+        <figure class="gallery__item reveal" data-cat="earth" data-caption="Timanfaya, Lanzarote · pristine 18th-century lava">
+          <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/7/72/Timanfaya_-_Lanzarote_02.jpg/1280px-Timanfaya_-_Lanzarote_02.jpg" alt="Timanfaya lava field, Lanzarote" loading="lazy" />
+        </figure>
+        <figure class="gallery__item gallery__item--tall reveal" data-cat="earth" data-caption="Río Tinto, Spain · acidic, iron-rich water that echoes Martian minerals">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/IronInRocksMakeRiverRed.jpg/1280px-IronInRocksMakeRiverRed.jpg" alt="Rio Tinto red river" loading="lazy" />
+        </figure>
+        <figure class="gallery__item reveal" data-cat="earth" data-caption="Dallol, Ethiopia · hyperacidic springs and vivid mineral crusts">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/A_Sulphur_Pond%2C_Danakil_Depression%2C_Ethiopia.jpg/1280px-A_Sulphur_Pond%2C_Danakil_Depression%2C_Ethiopia.jpg" alt="Sulphur pond at Dallol, Ethiopia" loading="lazy" />
+        </figure>
+        <figure class="gallery__item gallery__item--wide reveal" data-cat="earth" data-caption="Craters of the Moon, Idaho · Apollo 14 trained on this lava field">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Cinder_cone_complex_%28Holocene%2C_~2.4_ka%3B_Big_Craters%2C_Craters_of_the_Moon_Lava_Field%2C_Snake_River_Plain%2C_Idaho%2C_USA%29_7.jpg/1280px-Cinder_cone_complex_%28Holocene%2C_~2.4_ka%3B_Big_Craters%2C_Craters_of_the_Moon_Lava_Field%2C_Snake_River_Plain%2C_Idaho%2C_USA%29_7.jpg" alt="Craters of the Moon lava field" loading="lazy" />
+        </figure>
+        <figure class="gallery__item reveal" data-cat="earth" data-caption="Cinder Lake Crater Field, Arizona · a man-made Apollo training ground">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/0/03/Cinder_Lake_Crater_Field_1.jpg" alt="Cinder Lake crater field" loading="lazy" />
+        </figure>
+        <figure class="gallery__item reveal" data-cat="earth" data-caption="Askja, Iceland · Apollo 11 and 12 geology training">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Viti_Crater_Askja_Iceland_UL1.jpg" alt="Viti crater, Askja" loading="lazy" />
+        </figure>
+        <figure class="gallery__item gallery__item--wide reveal" data-cat="mars" data-caption="Gale Crater, Mars · photographed by the Curiosity rover">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Curiosity_Captures_Mars_Landscape_While_Talking_to_an_Orbiter_%28PIA26632%29.jpg/1280px-Curiosity_Captures_Mars_Landscape_While_Talking_to_an_Orbiter_%28PIA26632%29.jpg" alt="Mars surface by Curiosity" loading="lazy" />
+        </figure>
+        <figure class="gallery__item reveal" data-cat="mars" data-caption="Wind-carved rock, Mars · Curiosity, 2024">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/NASA-MarsCuriosityRover-WindCarvedRock-20240228.jpg/1280px-NASA-MarsCuriosityRover-WindCarvedRock-20240228.jpg" alt="A wind-carved rock on Mars" loading="lazy" />
+        </figure>
+        <figure class="gallery__item reveal" data-cat="moon" data-caption="Apollo 17 · a panoramic view of the lunar surface">
+          <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/6/65/Apollo_17_Moon_Panorama.jpg/1280px-Apollo_17_Moon_Panorama.jpg" alt="Apollo 17 lunar panorama" loading="lazy" />
+        </figure>
+        <figure class="gallery__item reveal" data-cat="moon" data-caption="Buzz Aldrin, Apollo 11 · the Moon, 1969">
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Aldrin%20Apollo%2011%20original.jpg?width=1200" alt="Buzz Aldrin on the Moon" loading="lazy" />
+        </figure>
+      </div>
+    </section>
+
+    <div class="divider" aria-hidden="true"><span></span><em>✦ FINAL TEST · DO YOU TRUST YOUR EYES? ✦</em><span></span></div>
+
+    <!-- GAME -->
+    <section class="section game" id="game">
+      <div class="ghost" aria-hidden="true">08</div>
+      <div class="game__panel reveal">
+        <div class="game__halo" aria-hidden="true"></div>
+        <div class="game__intro" id="gameIntro">
+          <p class="eyebrow">✦ Guess the planet · mission briefing ✦</p>
+          <h2 class="section__title">Can you tell Earth from <span class="grad grad--hyper">its twins?</span></h2>
+          <p class="section__lede">Twelve photos. Three worlds. Some of these are Earth in disguise.</p>
+          <button class="btn btn--solid magnetic btn--big" type="button" id="gameStart"><span class="btn__flare"></span>▶ Start the game</button>
+          <p class="game__hint">+100 PTS PER CORRECT · STREAK BONUS · NO SECOND CHANCES</p>
+        </div>
+
+        <div class="game__play" id="gamePlay" hidden>
+          <div class="game__hud">
+            <span class="game__round" id="gameRound">Round 1 / 12</span>
+            <span class="game__meter"><i id="gameMeter"></i></span>
+            <span class="game__score" id="gameScore">Score 0</span>
+          </div>
+          <div class="game__stage">
+            <img id="gameImg" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="A mystery landscape to identify" />
+            <span class="game__scan" aria-hidden="true"></span>
+          </div>
+          <p class="game__question">Which world is this?</p>
+          <div class="game__choices" id="gameChoices">
+            <button type="button" data-pick="earth">◉ Earth</button>
+            <button type="button" data-pick="mars">✦ Mars</button>
+            <button type="button" data-pick="moon">◐ Moon</button>
+          </div>
+          <p class="game__fact" id="gameFact" aria-live="polite"></p>
+          <button class="btn btn--solid game__next magnetic" type="button" id="gameNext" hidden><span class="btn__flare"></span>Next →</button>
+        </div>
+
+        <div class="game__end" id="gameEnd" hidden>
+          <h2 class="section__title" id="gameTitle">Result</h2>
+          <p class="game__final-score" id="gameFinal">0 / 12</p>
+          <p class="section__lede" id="gameVerdict"></p>
+          <button class="btn btn--solid magnetic" type="button" id="gameAgain"><span class="btn__flare"></span>↻ Play again</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SOURCES -->
+    <section class="section sources" id="sources">
+      <div class="ghost" aria-hidden="true">09</div>
+      <div class="section__head reveal">
+        <p class="kicker"><span class="kicker__dot"></span>DEEP ARCHIVE · 09 — KEEP GOING</p>
+        <h2 class="section__title">Go <span class="grad grad--fire">deeper.</span></h2>
+        <p class="section__lede">The sites, catalogues and imagery behind this page, for anyone who wants to keep reading.</p>
+      </div>
+
+      <div class="sources__grid">
+        <a class="source reveal tilt" href="http://esamultimedia.esa.int/docs/gsp/The_Catalogue_of_Planetary_Analogues.pdf" target="_blank" rel="noopener">
+          <div class="card-shine" aria-hidden="true"></div>
+          <span class="source__type">◉ Catalogue</span>
+          <span class="source__name">ESA · The Catalogue of Planetary Analogues</span>
+          <span class="source__desc">30 sites with coordinates, geology, relevance and references.</span>
+        </a>
+        <a class="source reveal tilt" href="https://www.nasa.gov/analog-missions/" target="_blank" rel="noopener">
+          <div class="card-shine" aria-hidden="true"></div>
+          <span class="source__type">◉ Agency</span>
+          <span class="source__name">NASA · Analog Missions</span>
+          <span class="source__desc">How NASA uses Earth and habitats to prepare for space.</span>
+        </a>
+        <a class="source reveal tilt" href="https://science.nasa.gov/solar-system/analog-explorer/" target="_blank" rel="noopener">
+          <div class="card-shine" aria-hidden="true"></div>
+          <span class="source__type">◉ Explorer</span>
+          <span class="source__name">NASA · Planetary Analog Explorer</span>
+          <span class="source__desc">A map of analogue sites around the world.</span>
+        </a>
+        <a class="source reveal tilt" href="https://en.wikipedia.org/wiki/Terrestrial_analogue_site" target="_blank" rel="noopener">
+          <div class="card-shine" aria-hidden="true"></div>
+          <span class="source__type">◉ Overview</span>
+          <span class="source__name">Wikipedia · Terrestrial analogue site</span>
+          <span class="source__desc">The definition and the four fidelity criteria used above.</span>
+        </a>
+        <a class="source reveal tilt" href="https://github.com/rachellelecussan/planetary-analogue-catalogue" target="_blank" rel="noopener">
+          <div class="card-shine" aria-hidden="true"></div>
+          <span class="source__type">◉ Dataset</span>
+          <span class="source__name">Planetary Analogue Catalogue</span>
+          <span class="source__desc">16 sites with limitations, hazards and image references.</span>
+        </a>
+        <a class="source reveal tilt" href="https://astrobiology.nasa.gov/research-locations/" target="_blank" rel="noopener">
+          <div class="card-shine" aria-hidden="true"></div>
+          <span class="source__type">◉ Directory</span>
+          <span class="source__name">NASA Astrobiology · Field Sites</span>
+          <span class="source__desc">Where scientists study life in extreme environments.</span>
+        </a>
+      </div>
+
+      <p class="sources__note reveal">Imagery: NASA and Wikimedia Commons contributors. Figures and site notes: ESA, NASA and Wikipedia. Content is educational, not mission advice.</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__giant" aria-hidden="true">TWIN&nbsp;WORLDS</div>
+    <div class="footer__brand">TWIN&nbsp;WORLDS ✦ EARTH · MARS · MOON</div>
+    <p class="footer__note">Earth’s Mars and Moon analogues, with the science and the caveats attached.</p>
+    <p class="footer__fine">Built for students, the curious and space enthusiasts · signal ends · <a href="#top">back to orbit ↑</a></p>
+  </footer>
+
+  <button class="to-top" id="toTop" aria-label="Back to top">↑</button>
+
+  <div class="lightbox" id="lightbox" hidden>
+    <button class="lightbox__close" id="lightboxClose" aria-label="Close">×</button>
+    <img class="lightbox__img" id="lightboxImg" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="" />
+    <p class="lightbox__caption" id="lightboxCaption"></p>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
