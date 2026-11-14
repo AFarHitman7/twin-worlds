@@ -1,3 +1,9 @@
+export const PAGES = [
+  { path: "/", label: "Home" },
+  { path: "/atlas", label: "Atlas" },
+  { path: "/game", label: "Game" },
+];
+
 export const NAV_LINKS = [
   { id: "worlds", num: "01", label: "Worlds" },
   { id: "mars", num: "02", label: "Mars" },

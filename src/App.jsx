@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import Cursor from "./components/chrome/Cursor.jsx";
 import Loader from "./components/chrome/Loader.jsx";
 import ScrollProgress from "./components/chrome/ScrollProgress.jsx";
@@ -6,23 +6,21 @@ import SpaceBackdrop from "./components/chrome/SpaceBackdrop.jsx";
 import StardustTrail from "./components/chrome/StardustTrail.jsx";
 import Starfield from "./components/chrome/Starfield.jsx";
 import ToTop from "./components/chrome/ToTop.jsx";
-import Divider from "./components/layout/Divider.jsx";
 import Footer from "./components/layout/Footer.jsx";
 import Nav from "./components/layout/Nav.jsx";
-import Ticker from "./components/layout/Ticker.jsx";
-import Compare from "./components/sections/Compare.jsx";
-import Fidelity from "./components/sections/Fidelity.jsx";
-import Gallery from "./components/sections/Gallery.jsx";
-import Game from "./components/sections/Game.jsx";
-import Hero from "./components/sections/Hero.jsx";
-import Lookalikes from "./components/sections/Lookalikes.jsx";
-import Mars from "./components/sections/Mars.jsx";
-import Moon from "./components/sections/Moon.jsx";
-import Sources from "./components/sections/Sources.jsx";
-import Worlds from "./components/sections/Worlds.jsx";
+import AtlasPage from "./pages/AtlasPage.jsx";
+import GamePage from "./pages/GamePage.jsx";
+import LandingPage from "./pages/LandingPage.jsx";
+import { useRoute, useScrollToTop } from "./router/useRoute.js";
 
 export default function App() {
-  const [loaded, setLoaded] = useState(false);
+  const { route } = useRoute();
+  // The launch sequence belongs to a first visit of the landing page only.
+  const entryRoute = useRef(route).current;
+  const withLoader = entryRoute === "/";
+  const [loaded, setLoaded] = useState(!withLoader);
+
+  useScrollToTop(route);
 
   useEffect(() => {
     if (loaded) document.body.classList.add("is-loaded");
@@ -32,31 +30,19 @@ export default function App() {
 
   return (
     <>
-      <Loader onDone={onLoaderDone} />
+      {withLoader ? <Loader onDone={onLoaderDone} /> : null}
       <Cursor />
       <ScrollProgress />
       <Starfield />
       <StardustTrail />
       <SpaceBackdrop />
-      <Nav />
+      <Nav route={route} />
 
-      <main>
-        <Hero />
-        <Ticker />
-        <Worlds />
-        <Divider text="✦ TRANSMISSION 01 · STABLE ✦" />
-        <Fidelity />
-        <Mars />
-        <Moon />
-        <Compare />
-        <Lookalikes />
-        <Gallery />
-        <Divider text="✦ FINAL TEST · DO YOU TRUST YOUR EYES? ✦" />
-        <Game />
-        <Sources />
-      </main>
+      <Suspense fallback={<main id="main" aria-busy="true" />}>
+        {route === "/atlas" ? <AtlasPage /> : route === "/game" ? <GamePage /> : <LandingPage />}
+      </Suspense>
 
-      <Footer />
+      <Footer route={route} />
       <ToTop />
     </>
   );
