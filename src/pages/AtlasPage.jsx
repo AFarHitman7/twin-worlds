@@ -1,7 +1,14 @@
+import { useState } from "react";
 import { cx } from "../lib/cx.js";
+import Globe from "../components/atlas/Globe.jsx";
+import { SITES } from "../data/atlas.js";
 import s from "./Page.module.css";
 
 export default function AtlasPage() {
+  // Task 4 replaces this page wholesale; the local state is only here to prove
+  // the globe's prop contract on the live route.
+  const [selected, setSelected] = useState(null);
+
   return (
     <main id="main" className={s.page}>
       <section className={cx("section", s.head)}>
@@ -9,10 +16,17 @@ export default function AtlasPage() {
           <p className="eyebrow">PLANETARY ANALOGUE ATLAS</p>
           <h1 className="section__title">The atlas</h1>
           <p className="section__lede">
-            An interactive globe is being installed here: analogue sites as pins, filtered by
-            world, each with its dossier and the caveats attached.
+            Eighteen analogue sites, pinned where they actually sit. Drag the globe to
+            turn it; select a pin and the site turns to face you.
           </p>
-          <p className={s.note}>The globe lands here next; this page is the shell for it.</p>
+        </div>
+        <div style={{ width: "100%", maxWidth: 640, margin: "0 auto" }}>
+          <Globe
+            sites={SITES}
+            selected={selected}
+            onSelect={setSelected}
+            filter="all"
+          />
         </div>
       </section>
     </main>

@@ -1,0 +1,287 @@
+/* ============================================================
+   THE GLOBE — a lit Earth on the atlas page's own dark sky.
+   The stage is square, transparent, and never paints a backdrop:
+   Starfield and SpaceBackdrop already sit behind the page.
+   ============================================================ */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  width: 100%;
+}
+
+.stage {
+  position: relative;
+  width: min(100%, 68vh, 680px);
+  aspect-ratio: 1;
+  margin-inline: auto;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  cursor: grab;
+  isolation: isolate;
+  background: transparent;
+}
+.stage[data-dragging="true"] { cursor: grabbing; }
+
+/* Soft planetary halo, borrowed from the palette at low alpha. */
+.glow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      circle at 50% 47%,
+      color-mix(in srgb, var(--earth) 9%, transparent) 0%,
+      transparent 58%
+    ),
+    radial-gradient(
+      circle at 50% 52%,
+      color-mix(in srgb, var(--signal) 11%, transparent) 0%,
+      transparent 68%
+    );
+  filter: blur(10px);
+  pointer-events: none;
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 400ms var(--ease-out);
+}
+.stage[data-status="ready"] .canvas { opacity: 1; }
+
+/* ---------------------------------------------------------------- pins */
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 400ms var(--ease-out);
+}
+.stage[data-status="ready"] .overlay { opacity: 1; }
+.stage[data-status="error"] .overlay { opacity: 0; }
+.stage[data-status="error"] .pin {
+  visibility: hidden !important;
+  pointer-events: none;
+}
+
+.pin {
+  --pin-color: var(--moon);
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  min-height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--pin-color);
+  visibility: hidden;
+  pointer-events: auto;
+  transform: translate3d(-100px, -100px, 0) translate(-50%, -50%);
+  transition: opacity 240ms linear;
+  will-change: transform;
+  -webkit-tap-highlight-color: transparent;
+}
+.pin[data-targets="mars"] { --pin-color: var(--mars-hot); }
+.pin[data-targets="moon"] { --pin-color: var(--moon); }
+.pin[data-targets="both"] { --pin-color: var(--sun); }
+
+.pin[data-dim="true"] { opacity: 0.26; }
+.pin[data-dim="true"]:hover,
+.pin[data-dim="true"]:focus-visible { opacity: 0.6; }
+.pin:focus-visible { outline-offset: 2px; border-radius: 50%; }
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--pin-color);
+  box-shadow:
+    0 0 0 1px rgba(3, 5, 9, 0.6),
+    0 0 10px color-mix(in srgb, var(--pin-color) 55%, transparent);
+  transition:
+    transform 180ms var(--ease-out),
+    box-shadow 180ms var(--ease-out);
+}
+
+.pin:hover .dot,
+.pin:focus-visible .dot {
+  transform: scale(1.15);
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--pin-color) 22%, transparent),
+    0 0 16px color-mix(in srgb, var(--pin-color) 70%, transparent);
+}
+
+.pin[data-selected="true"] .dot {
+  transform: scale(1.25);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--pin-color) 30%, transparent),
+    0 0 18px color-mix(in srgb, var(--pin-color) 80%, transparent);
+}
+
+.pulse {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border: 1px solid var(--pin-color);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  animation: pinPulse 3.4s var(--ease-out) infinite;
+  animation-delay: var(--pin-delay, 0s);
+}
+
+@keyframes pinPulse {
+  0% { transform: scale(1); opacity: 0.5; }
+  70% { transform: scale(2.8); opacity: 0; }
+  100% { transform: scale(2.8); opacity: 0; }
+}
+
+/* Name chip, always kept inside the stage by the flip attributes. */
+.chip {
+  position: absolute;
+  top: calc(100% + 7px);
+  left: 50%;
+  z-index: 1;
+  max-width: min(46vw, 12rem);
+  padding: 0.28rem 0.5rem 0.26rem;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--pin-color) 45%, transparent);
+  border-radius: 3px;
+  background: rgba(3, 5, 9, 0.82);
+  box-shadow: 0 6px 20px rgba(3, 5, 9, 0.55);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.pin[data-flip-x="start"] .chip { left: 0; transform: none; }
+.pin[data-flip-x="end"] .chip { right: 0; left: auto; transform: none; }
+.pin[data-flip-y="up"] .chip { top: auto; bottom: calc(100% + 7px); }
+
+/* ------------------------------------------------------- loading / error */
+
+.skeleton {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: none;
+  transition:
+    opacity 400ms var(--ease-out),
+    visibility 0s linear 400ms;
+}
+.skeleton::before {
+  content: "";
+  position: absolute;
+  width: 74%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      circle at 38% 32%,
+      color-mix(in srgb, var(--earth) 14%, transparent) 0%,
+      color-mix(in srgb, var(--panel) 92%, transparent) 56%,
+      rgba(3, 5, 9, 0.15) 74%
+    );
+  box-shadow:
+    inset 0 0 90px rgba(3, 5, 9, 0.85),
+    0 0 60px rgba(3, 5, 9, 0.4);
+  animation: breathe 3.6s ease-in-out infinite;
+}
+.skeletonLabel {
+  position: relative;
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  animation: skeletonBlink 2.6s infinite;
+}
+.stage[data-status="ready"] .skeleton,
+.stage[data-status="error"] .skeleton {
+  opacity: 0;
+  visibility: hidden;
+}
+
+@keyframes breathe {
+  50% { transform: scale(1.02); opacity: 0.82; }
+}
+@keyframes skeletonBlink {
+  50% { opacity: 0.4; }
+}
+
+.failed {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.85rem;
+  padding: 2rem;
+  text-align: center;
+}
+.failed p {
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.failed a {
+  padding-bottom: 1px;
+  border-bottom: 1px solid color-mix(in srgb, var(--sun) 45%, transparent);
+  color: var(--sun);
+  font-size: var(--text-sm);
+}
+.failed a:hover { border-bottom-color: var(--sun); }
+
+.caption {
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse { animation: none; opacity: 0; }
+  .skeleton::before,
+  .skeletonLabel { animation: none; }
+  .canvas,
+  .overlay,
+  .skeleton { transition: none; }
+}
