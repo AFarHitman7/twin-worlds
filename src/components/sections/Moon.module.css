@@ -8,4 +8,5 @@
   gap: 1.25rem; overflow-x: auto; padding: 0.5rem clamp(1.25rem, 4vw, 2rem) 1.4rem;
   scroll-snap-type: x mandatory; scrollbar-width: thin; scrollbar-color: var(--signal) transparent;
 }
-.stripCard { scroll-snap-align: start; }
+/* The grid item is the card's anchor wrapper when a card is linked. */
+.strip > * { scroll-snap-align: start; }

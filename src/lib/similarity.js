@@ -64,18 +64,10 @@ export function overallScore(site, body) {
   for (const param of PARAMS) {
     const entry = site.params[param.key];
     const score = entry ? entry[body] : undefined;
-    if (typeof param.weight !== "number" || typeof score !== "number") return null;
+    if (!Number.isFinite(param.weight) || !Number.isFinite(score)) return null;
     total += score * param.weight;
     weight += param.weight;
   }
 
   return weight > 0 ? Math.round(total / weight) : null;
-}
-
-/** Coarse band used by the atlas bars: high >= 75, mid >= 45, otherwise low. */
-export function scoreTone(score) {
-  if (typeof score !== "number") return "low";
-  if (score >= 75) return "high";
-  if (score >= 45) return "mid";
-  return "low";
 }

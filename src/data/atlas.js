@@ -2,7 +2,11 @@ import { SOURCES } from "./sources.js";
 
 // Citation hrefs come from the site's own source list, so a dossier can never
 // point at a URL the sources section does not already carry.
-const sourceHref = (name) => SOURCES.find((source) => source.name === name).href;
+const sourceHref = (name) => {
+  const source = SOURCES.find((entry) => entry.name === name);
+  if (!source) throw new Error("Unknown source: " + name);
+  return source.href;
+};
 
 const ESA = sourceHref("ESA · The Catalogue of Planetary Analogues");
 const NASA = sourceHref("NASA · Analog Missions");
@@ -27,6 +31,7 @@ export const SITES = [
     featured: true,
     img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Anfiteatro%2C_Valle_de_la_Luna%2C_San_Pedro_de_Atacama%2C_Chile%2C_2016-02-01%2C_DD_149.JPG/1280px-Anfiteatro%2C_Valle_de_la_Luna%2C_San_Pedro_de_Atacama%2C_Chile%2C_2016-02-01%2C_DD_149.JPG",
     alt: "Bare banded hills in the Atacama desert, Chile",
+    imgCredit: "Wikimedia Commons",
     summary: "The driest non-polar desert on Earth, and the closest soil to Mars.",
     location:
       "Northern Chile, around the salt basins of the Antofagasta region. Reached by road from San Pedro de Atacama; parts are protected, parts are mine and research land.",
@@ -105,6 +110,7 @@ export const SITES = [
     featured: true,
     img: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Gargoyle_Ridge_in_the_McMurdo_Dry_Valleys_in_Antarctica_%2830877661786%29.jpg/1280px-Gargoyle_Ridge_in_the_McMurdo_Dry_Valleys_in_Antarctica_%2830877661786%29.jpg",
     alt: "Bare rocky ridge in the McMurdo Dry Valleys, Antarctica",
+    imgCredit: "Wikimedia Commons",
     summary:
       "Cold, snow-free valleys that ESA calls the most Mars-like environment on Earth.",
     location:
@@ -184,6 +190,7 @@ export const SITES = [
     featured: true,
     img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/70/Flying_over_Devon_Island_%282665527817%29.jpg/1280px-Flying_over_Devon_Island_%282665527817%29.jpg",
     alt: "Aerial view of the barren Devon Island, Canada",
+    imgCredit: "Wikimedia Commons",
     summary:
       "A 23 km impact structure in a polar desert, used to rehearse Mars isolation.",
     location:
@@ -263,6 +270,7 @@ export const SITES = [
     featured: true,
     img: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Artemis_II_Crew_geology_training_in_Iceland_-_jsc2024e055198.jpg/1280px-Artemis_II_Crew_geology_training_in_Iceland_-_jsc2024e055198.jpg",
     alt: "Astronauts training on dark volcanic rock in Iceland",
+    imgCredit: "NASA / Wikimedia Commons",
     summary:
       "Young fissure lava and altered basalt where Apollo crews and rover prototypes trained.",
     location:
@@ -342,6 +350,7 @@ export const SITES = [
     featured: true,
     img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/72/Timanfaya_-_Lanzarote_02.jpg/1280px-Timanfaya_-_Lanzarote_02.jpg",
     alt: "Dark volcanic terrain of Timanfaya, Lanzarote",
+    imgCredit: "Wikimedia Commons",
     summary:
       "Eighteenth-century lava and tubes, and a field site for astronaut training.",
     location:
@@ -421,6 +430,7 @@ export const SITES = [
     featured: true,
     img: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/IronInRocksMakeRiverRed.jpg/1280px-IronInRocksMakeRiverRed.jpg",
     alt: "The red, iron-rich water of the Rio Tinto in Spain",
+    imgCredit: "Wikimedia Commons",
     summary:
       "An acid, iron-red river precipitating the same minerals found at Meridiani Planum.",
     location:
@@ -502,6 +512,7 @@ export const SITES = [
     featured: true,
     img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Cinder_cone_complex_%28Holocene%2C_~2.4_ka%3B_Big_Craters%2C_Craters_of_the_Moon_Lava_Field%2C_Snake_River_Plain%2C_Idaho%2C_USA%29_7.jpg/1280px-Cinder_cone_complex_%28Holocene%2C_~2.4_ka%3B_Big_Craters%2C_Craters_of_the_Moon_Lava_Field%2C_Snake_River_Plain%2C_Idaho%2C_USA%29_7.jpg",
     alt: "Black cinder cones of Craters of the Moon, Idaho",
+    imgCredit: "Wikimedia Commons",
     summary:
       "A young basalt sea where Apollo 14 crews learned to read volcanic ground.",
     location:
@@ -581,6 +592,7 @@ export const SITES = [
     featured: true,
     img: "https://upload.wikimedia.org/wikipedia/commons/0/03/Cinder_Lake_Crater_Field_1.jpg",
     alt: "The man-made Cinder Lake crater field in Arizona",
+    imgCredit: "Wikimedia Commons",
     summary:
       "A crater field blasted from a Lunar Orbiter photograph in the 1960s, for Apollo practice.",
     location:
@@ -616,7 +628,7 @@ export const SITES = [
       precip: {
         value: "About 300 mm/yr",
         moon: 8,
-        mars: 28,
+        mars: 30,
         note: "Winter snow and summer storms.",
       },
       pressure: {
@@ -633,9 +645,9 @@ export const SITES = [
       },
       regolith: {
         value: "Cinders, ash, basaltic gravel",
-        moon: 94,
+        moon: 88,
         mars: 68,
-        note: "Cinders and ash, laid out as lunar ground.",
+        note: "Cinders and ash, but no anorthosite or nanophase iron.",
       },
       ops: {
         value: "Apollo traverse practice",
@@ -660,6 +672,7 @@ export const SITES = [
     featured: true,
     img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/2019_Meteor_Crater%2C_Arizona.jpg/1280px-2019_Meteor_Crater%2C_Arizona.jpg",
     alt: "The vast bowl of Meteor Crater in Arizona",
+    imgCredit: "Wikimedia Commons",
     summary:
       "A 1.2 km bowl about 50,000 years old, and a classroom for impact geology.",
     location:
@@ -695,7 +708,7 @@ export const SITES = [
       precip: {
         value: "About 200 mm/yr",
         moon: 12,
-        mars: 35,
+        mars: 40,
         note: "Grass grows nearby, so water is present.",
       },
       pressure: {
@@ -739,6 +752,7 @@ export const SITES = [
     featured: true,
     img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/de/Mauna_Kea_Summit_%28503893%29_%2821743654782%29.jpg/1280px-Mauna_Kea_Summit_%28503893%29_%2821743654782%29.jpg",
     alt: "Barren volcanic summit of Mauna Kea, Hawaii",
+    imgCredit: "Wikimedia Commons",
     summary:
       "A high, barren cinder summit where Apollo crews trained and lunar tools were tested.",
     location:
@@ -767,7 +781,7 @@ export const SITES = [
       },
       swing: {
         value: "About 10 K",
-        moon: 3,
+        moon: 4,
         mars: 25,
         note: "A cold summit with a small daily range.",
       },
@@ -818,6 +832,7 @@ export const SITES = [
     featured: true,
     img: "https://upload.wikimedia.org/wikipedia/commons/2/2f/Viti_Crater_Askja_Iceland_UL1.jpg",
     alt: "The blue crater lake of Askja, Iceland",
+    imgCredit: "Wikimedia Commons",
     summary:
       "Black sand and craters where Apollo 11 and 12 crews learned field geology.",
     location:
@@ -897,6 +912,7 @@ export const SITES = [
     featured: true,
     img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/A114%2C_Lava_Beds_National_Monument%2C_California%2C_USA%2C_Golden_Dome_Lava_Tube_Cave%2C_2004.jpg/1280px-A114%2C_Lava_Beds_National_Monument%2C_California%2C_USA%2C_Golden_Dome_Lava_Tube_Cave%2C_2004.jpg",
     alt: "A lava tube cave in Lava Beds National Monument, California",
+    imgCredit: "Wikimedia Commons",
     summary:
       "Basaltic tubes and skylights used to model how lunar caves might be mapped.",
     location:
@@ -932,7 +948,7 @@ export const SITES = [
       precip: {
         value: "About 400 mm/yr",
         moon: 5,
-        mars: 22,
+        mars: 20,
         note: "Winter snow, dry summers.",
       },
       pressure: {
@@ -978,14 +994,15 @@ export const SITES = [
     featured: false,
     img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ee/ET_Afar_asv2018-01_img16_Dallol.jpg/1280px-ET_Afar_asv2018-01_img16_Dallol.jpg",
     alt: "Salt and sulphur terraces at Dallol, Ethiopia",
+    imgCredit: "Wikimedia Commons",
     summary:
       "Acid, hypersaline springs precipitating jarosite in one of the hottest places on Earth.",
     location:
       "The Danakil Depression in northern Ethiopia, below sea level. Reached by guided convoy; the area is hot, remote and occasionally unsafe.",
     geography:
-      "Salt flats, acid pools and mineral terraces around hot springs, coloured green and yellow by sulphur and salt.",
+      "Salt flats, acid pools and mineral terraces around hot springs, coloured green and yellow by sulphur and salt. The pools themselves are hypersaline and strongly acidic.",
     geology:
-      "Hydrothermal brines deposit halite, gypsum, sulphur and jarosite, with iron oxides staining the pools.",
+      "Hydrothermal brines deposit halite, gypsum, sulphur and jarosite, with iron oxides staining the pools. Akaganeite and hematite form alongside them.",
     atmosphere:
       "Mean air temperatures sit above 30 °C, and rain is rare and erratic. Air is dense at this depth and carries salt dust.",
     limits:
@@ -1057,6 +1074,7 @@ export const SITES = [
     featured: false,
     img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8f/Haakon_VII_Land_Bockfjorden_IMG_5543_Trolltindane_Sverrefjellet_Adolfbreen_Sm%C3%B6rstabben.JPG/1280px-Haakon_VII_Land_Bockfjorden_IMG_5543_Trolltindane_Sverrefjellet_Adolfbreen_Sm%C3%B6rstabben.JPG",
     alt: "Fjord and barren mountains at Bockfjorden, Svalbard",
+    imgCredit: "Wikimedia Commons",
     summary:
       "Red sandstone and cold springs in an Arctic desert, studied by the AMASE team.",
     location:
@@ -1136,18 +1154,19 @@ export const SITES = [
     featured: false,
     img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/51/Lava%2C_Parque_nacional_del_Teide%2C_Tenerife%2C_Espa%C3%B1a%2C_2015.JPG/1280px-Lava%2C_Parque_nacional_del_Teide%2C_Tenerife%2C_Espa%C3%B1a%2C_2015.JPG",
     alt: "Lava flows in Teide National Park, Tenerife",
+    imgCredit: "Wikimedia Commons",
     summary:
       "A high volcanic caldera of lava, pumice and tubes, within reach of a road.",
     location:
       "Teide National Park on Tenerife, reached by road from the coast. The caldera is open; the summit cable car is often crowded.",
     geography:
-      "A caldera about 15 km across below Pico del Teide, Spain's highest peak at 3,718 m. Lava flows, pumice fields and tubes fill the floor.",
+      "A caldera about 15 km across below Pico del Teide, Spain's highest peak at 3,718 m. Lava flows, pumice and tubes fill the floor.",
     geology:
-      "Basalt, phonolite and pumice from successive eruptions, with lava tubes and obsidian. The youngest flows are a few hundred years old.",
+      "Basalt, phonolite and pumice from successive eruptions, with lava tubes and obsidian. The youngest flows are centuries old.",
     atmosphere:
-      "High, dry and clear above the trade-wind cloud, with strong sun and cold nights. Snow falls on the peak in winter.",
+      "High, dry and clear above the trade-wind cloud, with strong sun and cold nights. Snow falls in winter.",
     limits:
-      "The caldera is high but not cold enough, and the atmosphere is still thick.",
+      "High, but not cold enough, and the atmosphere is still thick.",
     text: "A caldera of basalt, pumice and lava tubes at about 2,000 m, below Spain's highest peak.",
     reality: "A high, dry caldera, but still warm and thick-aired.",
     source: "ESA Catalogue · ch. 27",
@@ -1215,6 +1234,7 @@ export const SITES = [
     featured: false,
     img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e1/Dune_Namib_Naukluft_1.jpg/1280px-Dune_Namib_Naukluft_1.jpg",
     alt: "A red dune ridge in the Namib desert, Namibia",
+    imgCredit: "Wikimedia Commons",
     summary:
       "The oldest desert on Earth, with dunes at the closest scale to Martian ones.",
     location:
@@ -1294,6 +1314,7 @@ export const SITES = [
     featured: false,
     img: "https://upload.wikimedia.org/wikipedia/commons/4/49/Mars_Desert_Research_Station_2020.jpg",
     alt: "The Mars Desert Research Station habitat near Hanksville, Utah",
+    imgCredit: "Wikimedia Commons",
     summary:
       "Jurassic red beds around a desert town, and the Mars Desert Research Station.",
     location:
@@ -1373,6 +1394,7 @@ export const SITES = [
     featured: false,
     img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/Hamersley_Range%2C_Pilbara_Region%2C_Western_Australia.JPG/1280px-Hamersley_Range%2C_Pilbara_Region%2C_Western_Australia.JPG",
     alt: "Red rock and spinifex country in the Pilbara, Western Australia",
+    imgCredit: "Wikimedia Commons",
     summary:
       "Ancient rocks holding the oldest signs of life, in a dry red landscape.",
     location:

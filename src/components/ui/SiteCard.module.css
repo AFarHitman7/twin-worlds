@@ -41,8 +41,9 @@
 .reality b { display: block; font-family: var(--font-mono); font-size: 0.65625rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--planet); margin-bottom: 0.22rem; }
 .source { font-family: var(--font-mono); font-size: 0.65625rem; font-weight: 500; letter-spacing: 0.09em; text-transform: uppercase; color: var(--faint); opacity: 0.9; }
 
-/* Optional dossier link: the whole card becomes the anchor. */
-.link { display: block; color: inherit; text-decoration: none; border-radius: var(--radius); }
+/* Optional dossier link: the whole card becomes the anchor. `display: grid`
+   makes the article stretch to the grid row's height, as it did unwrapped. */
+.link { display: grid; color: inherit; text-decoration: none; border-radius: var(--radius); }
 .open {
   display: inline-flex; align-items: center; gap: 0.4rem; margin-top: 0.85rem;
   font-family: var(--font-mono); font-size: var(--text-micro); font-weight: 500;

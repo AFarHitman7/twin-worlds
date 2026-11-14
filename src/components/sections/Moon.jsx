@@ -32,7 +32,6 @@ export default function Moon() {
           <SiteCard
             site={site}
             planet="moon"
-            className={s.stripCard}
             href={"#/atlas/" + site.slug}
             key={site.title}
           />
