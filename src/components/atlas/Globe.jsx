@@ -9,8 +9,8 @@ const RAD = Math.PI / 180;
 const TEXTURE_URL = `${import.meta.env.BASE_URL}textures/earth-blue-marble.jpg`;
 const CAMERA_Z = 3.35;
 // The brief keeps the globe between 60% and 115% of the stage. With this lens
-// (38°) that ceiling is reached at z ≈ 2.72, so the near clamp stops there
-// instead of cropping the sphere at 2.35.
+// (38°) 115% is reached at z ≈ 2.72, so the near clamp sits at 2.75: the globe
+// may crop slightly at the closest zoom, which is intended.
 const ZOOM_MIN = 2.75;
 const ZOOM_MAX = 4.7;
 const PITCH_LIMIT = 1.15;
@@ -19,6 +19,7 @@ const SPIN_STEP = 0.0012;
 const VELOCITY_DECAY = 0.94;
 const VELOCITY_STOP = 0.0004;
 const FACING_MIN = 0.06;
+const PIN_SPACING = 22;
 const FOCUS_MS = 650;
 
 // The opening view: the Atlantic, with Africa turning toward the camera and
@@ -74,9 +75,15 @@ function targetLabel(targets = []) {
   return kind === "moon" ? "Moon analogue" : "Mars analogue";
 }
 
-export default function Globe({ sites = [], selected = null, onSelect, filter = "all" }) {
+export default function Globe({
+  sites = [],
+  selected = null,
+  onSelect,
+  filter = "all",
+  onShowList,
+}) {
   const stageRef = useRef(null);
-  const canvasRef = useRef(null);
+  const hostRef = useRef(null);
   const pinRefs = useRef([]);
   const apiRef = useRef(null);
   const didDragRef = useRef(0);
@@ -114,13 +121,20 @@ export default function Globe({ sites = [], selected = null, onSelect, filter = 
 
   useEffect(() => {
     const stage = stageRef.current;
-    const canvas = canvasRef.current;
-    if (!stage || !canvas) return undefined;
+    const host = hostRef.current;
+    if (!stage || !host) return undefined;
 
     if (!hasWebGL()) {
       setStatus("error");
       return undefined;
     }
+
+    // A fresh canvas per mount: losing its context on cleanup must not poison
+    // the element a StrictMode remount would reuse.
+    const canvas = document.createElement("canvas");
+    canvas.className = s.canvas;
+    canvas.setAttribute("aria-hidden", "true");
+    host.appendChild(canvas);
 
     let disposed = false;
     let loaded = false;
@@ -140,6 +154,10 @@ export default function Globe({ sites = [], selected = null, onSelect, filter = 
     let pointerDown = false;
     let pointerMoved = false;
     let captured = false;
+    let gesture = null; // null while pending, then "drag" or "pinch"
+    let pinchStartDistance = 0;
+    let pinchStartZoom = CAMERA_Z;
+    const pointers = new Map();
     let startX = 0;
     let startY = 0;
     let lastX = 0;
@@ -252,6 +270,7 @@ export default function Globe({ sites = [], selected = null, onSelect, filter = 
       const list = sitesRef.current;
       const pins = pinRefs.current;
       const current = selectedRef.current;
+      const visible = [];
 
       for (let index = 0; index < list.length; index += 1) {
         const pin = pins[index];
@@ -279,8 +298,50 @@ export default function Globe({ sites = [], selected = null, onSelect, filter = 
         }
 
         showPin(pin);
+        visible.push({ pin, site, x, y, z: world.z });
+      }
+
+      // Cinder Lake and Meteor Crater are ~40 km apart, which is one pixel at
+      // this scale: one pin would make the other unclickable. Nudge pairs that
+      // land within a fingertip of each other along the line between them. A
+      // ten-pixel shift is invisible on the globe and keeps both hittable.
+      for (let pass = 0; pass < 3; pass += 1) {
+        for (let i = 0; i < visible.length; i += 1) {
+          for (let j = i + 1; j < visible.length; j += 1) {
+            const a = visible[i];
+            const b = visible[j];
+            let dx = b.x - a.x;
+            let dy = b.y - a.y;
+            let distance = Math.hypot(dx, dy);
+            if (distance >= PIN_SPACING) continue;
+            if (distance < 0.01) {
+              dx = 0;
+              dy = 1;
+              distance = 1;
+            }
+            const push = (PIN_SPACING - distance) / 2;
+            const ux = dx / distance;
+            const uy = dy / distance;
+            a.x -= ux * push;
+            a.y -= uy * push;
+            b.x += ux * push;
+            b.y += uy * push;
+          }
+        }
+      }
+
+      for (const entry of visible) {
+        const { pin, site, z } = entry;
+        const x = clamp(entry.x, 8, width - 8);
+        const y = clamp(entry.y, 8, height - 8);
+
         pin.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0) translate(-50%, -50%)`;
-        pin.style.zIndex = String(10 + Math.round(world.z * 100));
+
+        const depth = String(10 + Math.round(z * 100));
+        if (pin.dataset.depth !== depth) {
+          pin.style.zIndex = depth;
+          pin.dataset.depth = depth;
+        }
 
         if (site.slug === current) {
           const flipX = x < 100 ? "start" : x > width - 100 ? "end" : "center";
@@ -318,6 +379,7 @@ export default function Globe({ sites = [], selected = null, onSelect, filter = 
       const rect = stage.getBoundingClientRect();
       width = Math.max(1, Math.round(rect.width));
       height = Math.max(1, Math.round(rect.height));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
@@ -433,11 +495,64 @@ export default function Globe({ sites = [], selected = null, onSelect, filter = 
     };
     document.addEventListener("visibilitychange", onVisibility);
 
-    // --- pointer: drag, inertia, pinch-free zoom --------------------------
+    // --- pointer: drag, inertia, two-finger pinch -------------------------
+    const releasePointer = (id) => {
+      try {
+        stage.releasePointerCapture(id);
+      } catch {
+        // Already released by the browser.
+      }
+    };
+
+    const firstTwo = () => {
+      const values = [...pointers.values()];
+      return [values[0], values[1]];
+    };
+
+    const beginPinch = () => {
+      const [a, b] = firstTwo();
+      if (!a || !b) return;
+      gesture = "pinch";
+      pointerDown = false;
+      pointerMoved = false;
+      captured = false;
+      pointerId = null;
+      pinchStartDistance = Math.max(1, Math.hypot(b.x - a.x, b.y - a.y));
+      pinchStartZoom = zoom;
+      zoomTarget = zoom;
+      interacted = true;
+      focusAnim = null;
+      yawVelocity = 0;
+      pitchVelocity = 0;
+      didDragRef.current = performance.now();
+      setDragging(false);
+      for (const id of pointers.keys()) {
+        try {
+          stage.setPointerCapture(id);
+        } catch {
+          // Pinch still works while both fingers stay on the stage.
+        }
+      }
+    };
+
     const onPointerDown = (event) => {
-      if (pointerDown || (event.pointerType === "mouse" && event.button !== 0)) {
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+      if (pointers.size >= 2) return;
+
+      pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+      if (pointers.size === 2) {
+        if (gesture === "drag") {
+          // This gesture is already a drag; a late finger must not turn it
+          // into a pinch halfway through.
+          pointers.delete(event.pointerId);
+          return;
+        }
+        beginPinch();
         return;
       }
+
+      gesture = null;
       pointerDown = true;
       pointerMoved = false;
       captured = false;
@@ -453,6 +568,25 @@ export default function Globe({ sites = [], selected = null, onSelect, filter = 
     };
 
     const onPointerMove = (event) => {
+      const point = pointers.get(event.pointerId);
+      if (!point) return;
+      point.x = event.clientX;
+      point.y = event.clientY;
+
+      if (gesture === "pinch") {
+        const [a, b] = firstTwo();
+        if (!a || !b) return;
+        const distance = Math.hypot(b.x - a.x, b.y - a.y);
+        if (distance > 1) {
+          zoomTarget = clamp(
+            (pinchStartZoom * pinchStartDistance) / distance,
+            ZOOM_MIN,
+            ZOOM_MAX
+          );
+        }
+        return;
+      }
+
       if (!pointerDown || event.pointerId !== pointerId) return;
 
       const dx = event.clientX - lastX;
@@ -460,16 +594,17 @@ export default function Globe({ sites = [], selected = null, onSelect, filter = 
       lastX = event.clientX;
       lastY = event.clientY;
 
-      if (!captured) {
+      if (gesture === null) {
         const travel = Math.hypot(event.clientX - startX, event.clientY - startY);
         if (travel < 4) return;
-        captured = true;
+        gesture = "drag";
         pointerMoved = true;
         didDragRef.current = performance.now();
         // Capture only once a real drag starts, so a plain click still
         // reaches the pin button underneath the pointer.
         try {
           stage.setPointerCapture(event.pointerId);
+          captured = true;
         } catch {
           captured = false;
         }
@@ -485,15 +620,23 @@ export default function Globe({ sites = [], selected = null, onSelect, filter = 
     };
 
     const endPointer = (event) => {
+      pointers.delete(event.pointerId);
+
+      if (gesture === "pinch") {
+        if (pointers.size < 2) {
+          for (const id of pointers.keys()) releasePointer(id);
+          gesture = null;
+          pointerDown = false;
+          captured = false;
+          pointerId = null;
+          setDragging(false);
+        }
+        return;
+      }
+
       if (!pointerDown) return;
       if (event.pointerId !== pointerId) return;
-      if (captured) {
-        try {
-          stage.releasePointerCapture(event.pointerId);
-        } catch {
-          // Already released by the browser.
-        }
-      }
+      if (captured) releasePointer(event.pointerId);
       pointerDown = false;
       captured = false;
       pointerId = null;
@@ -504,7 +647,9 @@ export default function Globe({ sites = [], selected = null, onSelect, filter = 
       }
     };
 
-    const onLostCapture = () => {
+    const onLostCapture = (event) => {
+      if (gesture !== "drag") return;
+      pointers.delete(event.pointerId);
       if (!pointerDown) return;
       pointerDown = false;
       captured = false;
@@ -571,6 +716,10 @@ export default function Globe({ sites = [], selected = null, onSelect, filter = 
         globeGroup.quaternion.copy(focusAnim.to);
         focusAnim = null;
       },
+      haltSpin() {
+        // Tabbing to a pin hands the globe to the keyboard user.
+        interacted = true;
+      },
     };
 
     // A selected site that arrives with the first render (a deep link) still
@@ -600,7 +749,9 @@ export default function Globe({ sites = [], selected = null, onSelect, filter = 
       material.dispose();
       atmosphereGeometry.dispose();
       atmosphereMaterial.dispose();
+      renderer.forceContextLoss();
       renderer.dispose();
+      canvas.remove();
     };
   }, []);
 
@@ -616,7 +767,7 @@ export default function Globe({ sites = [], selected = null, onSelect, filter = 
         aria-busy={status === "loading"}
       >
         <div className={s.glow} aria-hidden="true" />
-        <canvas ref={canvasRef} className={s.canvas} aria-hidden="true" />
+        <div ref={hostRef} className={s.canvasHost} aria-hidden="true" />
 
         <div className={s.overlay}>
           {sites.map((site, index) => {
@@ -637,10 +788,16 @@ export default function Globe({ sites = [], selected = null, onSelect, filter = 
                 data-hidden="true"
                 tabIndex={-1}
                 aria-label={`${site.name}, ${targetLabel(site.targets)}`}
-                onClick={() => {
+                onFocus={() => apiRef.current?.haltSpin()}
+                onClick={(event) => {
                   // A drag that ends over a pin must not also select it; a
-                  // keyboard click after the drag is still allowed.
-                  if (performance.now() - didDragRef.current < 350) return;
+                  // keyboard click (detail 0) is never a drag's click.
+                  if (
+                    event.detail > 0 &&
+                    performance.now() - didDragRef.current < 350
+                  ) {
+                    return;
+                  }
                   onSelect?.(site.slug);
                 }}
               >
@@ -659,11 +816,15 @@ export default function Globe({ sites = [], selected = null, onSelect, filter = 
         {status === "error" ? (
           <div className={s.failed}>
             <p>Globe unavailable on this device</p>
-            <a href="#sites">See all sites</a>
+            {onShowList ? (
+              <button type="button" className={s.failedAction} onClick={onShowList}>
+                See all sites
+              </button>
+            ) : null}
           </div>
         ) : null}
       </div>
-      <p className={s.caption}>Drag to rotate · scroll to zoom</p>
+      <p className={s.caption}>Drag to rotate · pinch or scroll to zoom</p>
     </div>
   );
 }

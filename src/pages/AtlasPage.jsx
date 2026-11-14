@@ -3,6 +3,7 @@ import { cx } from "../lib/cx.js";
 import Globe from "../components/atlas/Globe.jsx";
 import { SITES } from "../data/atlas.js";
 import s from "./Page.module.css";
+import atlas from "./AtlasPage.module.css";
 
 export default function AtlasPage() {
   // Task 4 replaces this page wholesale; the local state is only here to prove
@@ -20,7 +21,7 @@ export default function AtlasPage() {
             turn it; select a pin and the site turns to face you.
           </p>
         </div>
-        <div style={{ width: "100%", maxWidth: 640, margin: "0 auto" }}>
+        <div className={atlas.globe}>
           <Globe
             sites={SITES}
             selected={selected}
