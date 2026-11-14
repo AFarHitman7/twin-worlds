@@ -1,6 +1,434 @@
-/* Task 4 replaces this page and this file. The globe only needs a column. */
-.globe {
+/* ============================================================
+   ATLAS — the band, the list, the reference table.
+   The dossier and the rings carry their own modules.
+   ============================================================ */
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.9rem;
+  margin-top: 1.6rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  line-height: 1.5;
+  color: var(--faint);
+  text-transform: uppercase;
+}
+
+.stats span + span {
+  padding-left: 0.9rem;
+  border-left: 1px solid var(--line-strong);
+}
+
+/* ------------------------------------------------------- main band: 7 + 5 */
+
+.band {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-items: start;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
   width: 100%;
-  max-width: 640px;
+  max-width: var(--max-w);
+  min-height: 640px;
   margin: 0 auto;
+  padding-inline: clamp(1.25rem, 4vw, 2rem);
+}
+
+.globeCol {
+  position: sticky;
+  top: calc(var(--nav-h) + 1.5rem);
+  align-self: start;
+  grid-column: span 7;
+  min-width: 0;
+}
+
+.dossierCol {
+  grid-column: span 5;
+  min-width: 0;
+}
+
+.globeBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.25rem 2rem;
+  margin-bottom: 1.1rem;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 40px;
+  padding: 0 1rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  text-transform: uppercase;
+  transition: border-color 180ms, color 180ms;
+}
+
+.chip:hover {
+  border-color: var(--line-strong);
+  color: var(--text);
+}
+
+.chip[aria-pressed="true"] {
+  border-color: var(--sun);
+  color: var(--sun);
+}
+
+.chipCount {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.72;
+}
+
+.legend {
+  max-width: 34rem;
+  margin-left: auto;
+  text-align: right;
+}
+
+.rubric {
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  line-height: 1.7;
+  color: var(--faint);
+}
+
+.rubric span { white-space: nowrap; }
+
+.legendNote {
+  max-width: 42ch;
+  margin-top: 0.45rem;
+  margin-left: auto;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+
+.globeWrap {
+  width: 100%;
+}
+
+.tapHint {
+  margin-top: 1rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  line-height: 1.5;
+  color: var(--faint);
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 118;
+  background: rgba(3, 5, 9, 0.6);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 240ms var(--ease-out);
+}
+
+.backdrop[data-open="true"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ---------------------------------------------------------- ranked table */
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.table th {
+  padding: 0 0.75rem 0.75rem 0;
+  border-bottom: 1px solid var(--line-strong);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  line-height: 1.4;
+  color: var(--faint);
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 0.55rem 0.75rem 0.55rem 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: var(--muted);
+  vertical-align: middle;
+}
+
+.table th:first-child,
+.table td:first-child {
+  padding-left: 0.6rem;
+}
+
+.table tr[data-selected="true"] {
+  background: rgba(236, 239, 244, 0.045);
+}
+
+.table tr[data-selected="true"] td:first-child {
+  box-shadow: inset 1px 0 0 var(--sun);
+}
+
+.table .rankCol {
+  width: 2.5rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.siteCell a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  color: var(--text);
+  border-bottom: 1px solid transparent;
+  transition: border-color 180ms;
+}
+
+.siteCell a:hover {
+  border-bottom-color: var(--line-strong);
+}
+
+.siteCell a[aria-current="true"] {
+  border-bottom-color: var(--sun);
+}
+
+.regionCol {
+  font-size: 0.8125rem;
+  color: var(--faint);
+}
+
+.targets {
+  white-space: nowrap;
+}
+
+.targets span {
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.targets span[data-body="mars"] { color: var(--mars-hot); }
+.targets span[data-body="moon"] { color: var(--moon); }
+
+.targets span + span::before {
+  content: " · ";
+  color: var(--faint);
+}
+
+.scoreCol {
+  white-space: nowrap;
+}
+
+.score {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.score[data-body="mars"] { --body-color: var(--mars-hot); }
+.score[data-body="moon"] { --body-color: var(--moon); }
+
+.track {
+  display: block;
+  width: 72px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--body-color);
+}
+
+.scoreNum {
+  min-width: 2ch;
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: 500;
+  line-height: 1;
+  color: var(--faint);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* -------------------------------------------------------- reference table */
+
+.refHead {
+  max-width: 700px;
+}
+
+.refNote {
+  max-width: 52ch;
+  margin-top: 1rem;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+
+.refWrap {
+  max-width: 820px;
+  margin-top: clamp(1.5rem, 3vw, 2rem);
+  overflow-x: auto;
+}
+
+.refTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.refTable th,
+.refTable td {
+  padding: 0.8rem 1.5rem 0.8rem 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  text-align: left;
+  vertical-align: top;
+}
+
+.refTable thead th {
+  padding-top: 0;
+  border-bottom-color: var(--line-strong);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  color: var(--faint);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.refTable tbody th {
+  font-weight: 400;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.refTable td { color: var(--text); }
+
+/* ------------------------------------------------------------ utilities */
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ----------------------------------------------------------- narrow page */
+
+@media (max-width: 1023px) {
+  .band {
+    display: block;
+    min-height: 0;
+  }
+
+  .globeCol {
+    position: static;
+  }
+
+  .globeBar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .legend {
+    max-width: none;
+    margin-left: 0;
+    text-align: left;
+  }
+
+  .legendNote {
+    margin-left: 0;
+  }
+
+  .globeWrap {
+    max-width: 420px;
+    margin-inline: auto;
+  }
+}
+
+@media (max-width: 720px) {
+  .regionCol {
+    display: none;
+  }
+
+  .table {
+    min-width: 100%;
+  }
+
+  .refTable th,
+  .refTable td {
+    padding-right: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats {
+    gap: 0.3rem 0.6rem;
+    letter-spacing: 0.12em;
+  }
+
+  .stats span + span {
+    padding-left: 0.6rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop { transition: none; }
+  .chip,
+  .siteCell a { transition: none; }
 }

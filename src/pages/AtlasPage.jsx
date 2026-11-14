@@ -1,35 +1,359 @@
-import { useState } from "react";
-import { cx } from "../lib/cx.js";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import Globe from "../components/atlas/Globe.jsx";
+import SiteDossier from "../components/atlas/SiteDossier.jsx";
+import { BODY_LABEL, GRAVITY, RUBRIC_PARTS } from "../components/atlas/rubric.js";
+import Sources from "../components/sections/Sources.jsx";
 import { SITES } from "../data/atlas.js";
+import { useMediaQuery, useReducedMotion } from "../hooks/useMediaQuery.js";
+import { cx } from "../lib/cx.js";
+import { PARAMS, overallScore } from "../lib/similarity.js";
+import { useRoute } from "../router/useRoute.js";
 import s from "./Page.module.css";
 import atlas from "./AtlasPage.module.css";
 
+const DEFAULT_SLUG = "atacama";
+const SITE_BY_SLUG = new Map(SITES.map((site) => [site.slug, site]));
+
+const FILTERS = [
+  { id: "all", label: "All" },
+  { id: "mars", label: "Mars" },
+  { id: "moon", label: "Moon" },
+];
+
+const COUNTS = {
+  all: SITES.length,
+  mars: SITES.filter((site) => site.targets.includes("mars")).length,
+  moon: SITES.filter((site) => site.targets.includes("moon")).length,
+};
+
+/** Fixed order by composite score, then by name, for each destination. */
+function rankBy(body) {
+  return [...SITES].sort((a, b) => {
+    const scoreA = overallScore(a, body) ?? -1;
+    const scoreB = overallScore(b, body) ?? -1;
+    return scoreB - scoreA || a.name.localeCompare(b.name);
+  });
+}
+
+const RANKED = { mars: rankBy("mars"), moon: rankBy("moon") };
+
+function Score({ body, value }) {
+  return (
+    <span className={atlas.score} data-body={body}>
+      <span className={atlas.track} aria-hidden="true">
+        <span
+          className={atlas.fill}
+          style={{ width: `${Number.isFinite(value) ? value : 0}%` }}
+        />
+      </span>
+      <span className={atlas.scoreNum}>{Number.isFinite(value) ? value : "—"}</span>
+    </span>
+  );
+}
+
 export default function AtlasPage() {
-  // Task 4 replaces this page wholesale; the local state is only here to prove
-  // the globe's prop contract on the live route.
-  const [selected, setSelected] = useState(null);
+  const { slug } = useRoute();
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
+  const reduced = useReducedMotion();
+
+  const [selectedSlug, setSelectedSlug] = useState(() =>
+    slug && SITE_BY_SLUG.has(slug) ? slug : DEFAULT_SLUG
+  );
+  const [filter, setFilter] = useState("all");
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const selectedSlugRef = useRef(selectedSlug);
+  const triggerRef = useRef(null);
+
+  useEffect(() => {
+    selectedSlugRef.current = selectedSlug;
+  }, [selectedSlug]);
+
+  // The URL is the source of truth for a deep link and for Back. A slug we do
+  // not know falls back to the default site, and the address is corrected with
+  // replaceState so no history entry is added per selection.
+  useEffect(() => {
+    if (slug && SITE_BY_SLUG.has(slug)) {
+      setSelectedSlug(slug);
+      return;
+    }
+    const fallback = slug ? DEFAULT_SLUG : selectedSlugRef.current;
+    setSelectedSlug(fallback);
+    window.history.replaceState(null, "", `#/atlas/${fallback}`);
+  }, [slug]);
+
+  // The sheet belongs to the narrow layout only.
+  useEffect(() => {
+    if (isDesktop) setSheetOpen(false);
+  }, [isDesktop]);
+
+  const selectSite = useCallback(
+    (nextSlug, { openSheet = false } = {}) => {
+      const site = SITE_BY_SLUG.get(nextSlug);
+      if (!site) return;
+
+      // A pin that does not match the filter still selects, and the filter
+      // follows the site so the pin and the list never disagree.
+      if (filter !== "all" && !site.targets.includes(filter)) {
+        setFilter(site.targets.includes("moon") ? "moon" : "mars");
+      }
+
+      setSelectedSlug(nextSlug);
+      window.history.replaceState(null, "", `#/atlas/${nextSlug}`);
+
+      if (openSheet && !isDesktop) {
+        triggerRef.current =
+          document.activeElement instanceof HTMLElement ? document.activeElement : null;
+        setSheetOpen(true);
+      }
+    },
+    [filter, isDesktop]
+  );
+
+  const handlePinSelect = useCallback(
+    (nextSlug) => selectSite(nextSlug, { openSheet: true }),
+    [selectSite]
+  );
+
+  const changeFilter = useCallback(
+    (next) => {
+      if (next === filter) return;
+      setFilter(next);
+
+      const current = SITE_BY_SLUG.get(selectedSlugRef.current);
+      if (next !== "all" && current && !current.targets.includes(next)) {
+        const top = RANKED[next][0];
+        if (top) {
+          setSelectedSlug(top.slug);
+          window.history.replaceState(null, "", `#/atlas/${top.slug}`);
+        }
+      }
+    },
+    [filter]
+  );
+
+  const closeSheet = useCallback(() => {
+    setSheetOpen(false);
+    const trigger = triggerRef.current;
+    if (trigger && trigger.isConnected) {
+      window.requestAnimationFrame(() => trigger.focus({ preventScroll: true }));
+    }
+  }, []);
+
+  const handleShowList = useCallback(() => {
+    document.getElementById("sites")?.scrollIntoView({
+      behavior: reduced ? "auto" : "smooth",
+      block: "start",
+    });
+  }, [reduced]);
+
+  const selectedSite = SITE_BY_SLUG.get(selectedSlug) ?? SITE_BY_SLUG.get(DEFAULT_SLUG);
+  const rankBody = filter === "moon" ? "moon" : "mars";
+  const rows = RANKED[rankBody];
 
   return (
     <main id="main" className={s.page}>
-      <section className={cx("section", s.head)}>
+      <section className={cx("section", s.head)} aria-labelledby="atlas-title">
         <div className="section__head">
-          <p className="eyebrow">PLANETARY ANALOGUE ATLAS</p>
-          <h1 className="section__title">The atlas</h1>
+          <p className="kicker">PLANETARY ANALOGUE ATLAS · {SITES.length} SITES</p>
+          <h1 className="section__title" id="atlas-title">
+            The atlas
+          </h1>
           <p className="section__lede">
-            Eighteen analogue sites, pinned where they actually sit. Drag the globe to
-            turn it; select a pin and the site turns to face you.
+            Eighteen places used to rehearse Mars and the Moon. Every score compares the
+            site with its destination, not the two planets with each other.
+          </p>
+          <p className={atlas.stats}>
+            <span>{SITES.length} sites</span>
+            <span>2 destinations</span>
+            <span>{PARAMS.length} parameters</span>
           </p>
         </div>
-        <div className={atlas.globe}>
-          <Globe
-            sites={SITES}
-            selected={selected}
-            onSelect={setSelected}
-            filter="all"
+      </section>
+
+      <div className={atlas.band}>
+        <div className={atlas.globeCol}>
+          <div className={atlas.globeBar}>
+            <div className={atlas.chips} role="group" aria-label="Filter sites by destination">
+              {FILTERS.map((entry) => (
+                <button
+                  key={entry.id}
+                  type="button"
+                  className={atlas.chip}
+                  aria-pressed={filter === entry.id}
+                  onClick={() => changeFilter(entry.id)}
+                >
+                  {entry.label}
+                  <span className={atlas.chipCount}>{COUNTS[entry.id]}</span>
+                </button>
+              ))}
+            </div>
+
+            <div className={atlas.legend}>
+              <p className={atlas.rubric}>
+                {RUBRIC_PARTS.map((part, index) => (
+                  <Fragment key={part}>
+                    {index > 0 ? " " : null}
+                    <span>
+                      {part}
+                      {index < RUBRIC_PARTS.length - 1 ? " ·" : ""}
+                    </span>
+                  </Fragment>
+                ))}
+              </p>
+              <p className={atlas.legendNote}>
+                Every site is still Earth. Pressure, gravity and mean temperature keep even
+                the best analogue under 50 out of 100.
+              </p>
+            </div>
+          </div>
+
+          <div className={atlas.globeWrap}>
+            <Globe
+              sites={SITES}
+              selected={selectedSlug}
+              onSelect={handlePinSelect}
+              filter={filter}
+              onShowList={handleShowList}
+            />
+          </div>
+
+          {!isDesktop && !sheetOpen ? (
+            <p className={atlas.tapHint}>Tap a pin to open its dossier</p>
+          ) : null}
+        </div>
+
+        <div className={atlas.dossierCol}>
+          <SiteDossier
+            site={selectedSite}
+            dialog={!isDesktop}
+            open={sheetOpen}
+            onClose={closeSheet}
           />
         </div>
+      </div>
+
+      {!isDesktop ? (
+        <div
+          className={atlas.backdrop}
+          data-open={sheetOpen ? "true" : "false"}
+          onClick={closeSheet}
+          aria-hidden="true"
+        />
+      ) : null}
+
+      <section id="sites" className="section" aria-labelledby="ranked-title">
+        <div className="section__head">
+          <p className="kicker">THE FULL LIST</p>
+          <h2 className="section__title" id="ranked-title">
+            All sites, ranked
+          </h2>
+        </div>
+
+        <div className={atlas.tableWrap}>
+          <table className={atlas.table}>
+            <caption className={atlas.srOnly}>
+              All {SITES.length} analogue sites, ranked by {BODY_LABEL[rankBody]} similarity.
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col" className={atlas.rankCol}>
+                  #
+                </th>
+                <th scope="col">Site</th>
+                <th scope="col" className={atlas.regionCol}>
+                  Region
+                </th>
+                <th scope="col">Targets</th>
+                <th scope="col" className={atlas.scoreCol}>
+                  Mars
+                </th>
+                <th scope="col" className={atlas.scoreCol}>
+                  Moon
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((site, index) => {
+                const mars = overallScore(site, "mars");
+                const moon = overallScore(site, "moon");
+                const isSelected = site.slug === selectedSlug;
+                return (
+                  <tr key={site.slug} data-selected={isSelected ? "true" : undefined}>
+                    <td className={atlas.rankCol}>{index + 1}</td>
+                    <td className={atlas.siteCell}>
+                      <a
+                        href={`#/atlas/${site.slug}`}
+                        aria-current={isSelected ? "true" : undefined}
+                        onClick={(event) => {
+                          event.preventDefault();
+                          selectSite(site.slug, { openSheet: true });
+                        }}
+                      >
+                        {site.name}
+                      </a>
+                    </td>
+                    <td className={atlas.regionCol}>{site.region}</td>
+                    <td className={atlas.targets}>
+                      {site.targets.map((target) => (
+                        <span key={target} data-body={target}>
+                          {BODY_LABEL[target]}
+                        </span>
+                      ))}
+                    </td>
+                    <td className={atlas.scoreCol}>
+                      <Score body="mars" value={mars} />
+                    </td>
+                    <td className={atlas.scoreCol}>
+                      <Score body="moon" value={moon} />
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </section>
+
+      <section className="section" aria-labelledby="reference-title">
+        <div className={atlas.refHead}>
+          <p className="kicker">REFERENCE VALUES</p>
+          <h2 className="section__title" id="reference-title">
+            The two destinations
+          </h2>
+        </div>
+        <p className={atlas.refNote}>Scores compare a site's value with these numbers.</p>
+
+        <div className={atlas.refWrap}>
+          <table className={atlas.refTable}>
+            <caption className={atlas.srOnly}>
+              Mars and Moon reference values for the seven parameters and gravity.
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Parameter</th>
+                <th scope="col">Mars</th>
+                <th scope="col">Moon</th>
+              </tr>
+            </thead>
+            <tbody>
+              {PARAMS.map((param) => (
+                <tr key={param.key}>
+                  <th scope="row">{param.label}</th>
+                  <td>{param.marsRef}</td>
+                  <td>{param.moonRef}</td>
+                </tr>
+              ))}
+              <tr>
+                <th scope="row">Gravity</th>
+                <td>{GRAVITY.mars}</td>
+                <td>{GRAVITY.moon}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <Sources />
     </main>
   );
 }
