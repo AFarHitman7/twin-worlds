@@ -1,17 +1,30 @@
-import { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Globe from "../components/atlas/Globe.jsx";
+import Rubric from "../components/atlas/Rubric.jsx";
 import SiteDossier from "../components/atlas/SiteDossier.jsx";
-import { BODY_LABEL, GRAVITY, RUBRIC_PARTS } from "../components/atlas/rubric.js";
+import { BODY_LABEL, GRAVITY } from "../components/atlas/rubric.js";
 import Sources from "../components/sections/Sources.jsx";
 import { SITES } from "../data/atlas.js";
 import { useMediaQuery, useReducedMotion } from "../hooks/useMediaQuery.js";
 import { cx } from "../lib/cx.js";
-import { PARAMS, overallScore } from "../lib/similarity.js";
-import { useRoute } from "../router/useRoute.js";
+import { BODIES, PARAMS, overallScore } from "../lib/similarity.js";
+import { replaceRoute, useRoute } from "../router/useRoute.js";
 import s from "./Page.module.css";
 import atlas from "./AtlasPage.module.css";
 
-const DEFAULT_SLUG = "atacama";
+const BODY_NAME = BODY_LABEL;
+
+// The opening dossier is the strongest featured Mars analogue, not a name
+// typed into the page: change the data and the default follows.
+const FEATURED = SITES.filter((site) => site.featured);
+const DEFAULT_SLUG =
+  [...FEATURED]
+    .sort(
+      (a, b) =>
+        (overallScore(b, "mars") ?? -1) - (overallScore(a, "mars") ?? -1) ||
+        a.name.localeCompare(b.name)
+    )[0]?.slug ?? SITES[0].slug;
+
 const SITE_BY_SLUG = new Map(SITES.map((site) => [site.slug, site]));
 
 const FILTERS = [
@@ -37,6 +50,25 @@ function rankBy(body) {
 
 const RANKED = { mars: rankBy("mars"), moon: rankBy("moon") };
 
+/** Keep a pressed chip and the selected site telling the same story. */
+function followSite(site, current) {
+  if (!site || current === "all" || site.targets.includes(current)) return current;
+  return site.targets.includes("moon") ? "moon" : "mars";
+}
+
+function filterMessage(next) {
+  if (next === "all") return `Showing all ${SITES.length} sites, ranked by Mars match`;
+  return `Showing ${COUNTS[next]} ${BODY_NAME[next]} analogues, ranked by ${BODY_NAME[next]} match`;
+}
+
+function selectionMessage(site) {
+  const mars = overallScore(site, "mars");
+  const moon = overallScore(site, "moon");
+  return `${site.name} selected. Mars ${Number.isFinite(mars) ? mars : "not scored"}, Moon ${
+    Number.isFinite(moon) ? moon : "not scored"
+  }.`;
+}
+
 function Score({ body, value }) {
   return (
     <span className={atlas.score} data-body={body}>
@@ -61,6 +93,7 @@ export default function AtlasPage() {
   );
   const [filter, setFilter] = useState("all");
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [announcement, setAnnouncement] = useState("");
   const selectedSlugRef = useRef(selectedSlug);
   const triggerRef = useRef(null);
 
@@ -68,23 +101,33 @@ export default function AtlasPage() {
     selectedSlugRef.current = selectedSlug;
   }, [selectedSlug]);
 
+  const closeSheet = useCallback(() => {
+    setSheetOpen(false);
+    const trigger = triggerRef.current;
+    if (trigger && trigger.isConnected) {
+      window.requestAnimationFrame(() => trigger.focus({ preventScroll: true }));
+    }
+  }, []);
+
   // The URL is the source of truth for a deep link and for Back. A slug we do
   // not know falls back to the default site, and the address is corrected with
-  // replaceState so no history entry is added per selection.
+  // replaceRoute so no history entry is added per selection. The filter follows
+  // the site exactly as it does for a click, so Back cannot leave a pressed
+  // chip that excludes the dossier on screen.
   useEffect(() => {
-    if (slug && SITE_BY_SLUG.has(slug)) {
-      setSelectedSlug(slug);
-      return;
-    }
-    const fallback = slug ? DEFAULT_SLUG : selectedSlugRef.current;
-    setSelectedSlug(fallback);
-    window.history.replaceState(null, "", `#/atlas/${fallback}`);
+    const known = slug ? SITE_BY_SLUG.get(slug) : null;
+    const next = known ?? SITE_BY_SLUG.get(slug ? DEFAULT_SLUG : selectedSlugRef.current);
+
+    setSelectedSlug(next ? next.slug : DEFAULT_SLUG);
+    if (!known) replaceRoute(`/atlas/${next ? next.slug : DEFAULT_SLUG}`);
+    if (next) setFilter((current) => followSite(next, current));
   }, [slug]);
 
-  // The sheet belongs to the narrow layout only.
+  // The sheet belongs to the narrow layout only. Closing through the normal
+  // path returns focus instead of losing it with the unmounted close button.
   useEffect(() => {
-    if (isDesktop) setSheetOpen(false);
-  }, [isDesktop]);
+    if (isDesktop && sheetOpen) closeSheet();
+  }, [isDesktop, sheetOpen, closeSheet]);
 
   const selectSite = useCallback(
     (nextSlug, { openSheet = false } = {}) => {
@@ -94,11 +137,12 @@ export default function AtlasPage() {
       // A pin that does not match the filter still selects, and the filter
       // follows the site so the pin and the list never disagree.
       if (filter !== "all" && !site.targets.includes(filter)) {
-        setFilter(site.targets.includes("moon") ? "moon" : "mars");
+        setFilter(followSite(site, filter));
       }
 
       setSelectedSlug(nextSlug);
-      window.history.replaceState(null, "", `#/atlas/${nextSlug}`);
+      replaceRoute(`/atlas/${nextSlug}`);
+      setAnnouncement(selectionMessage(site));
 
       if (openSheet && !isDesktop) {
         triggerRef.current =
@@ -118,26 +162,21 @@ export default function AtlasPage() {
     (next) => {
       if (next === filter) return;
       setFilter(next);
+      setAnnouncement(filterMessage(next));
 
       const current = SITE_BY_SLUG.get(selectedSlugRef.current);
       if (next !== "all" && current && !current.targets.includes(next)) {
-        const top = RANKED[next][0];
+        // The list is sorted for the new body, so the first site that carries
+        // that target is its top analogue, not just its highest score.
+        const top = RANKED[next].find((site) => site.targets.includes(next));
         if (top) {
           setSelectedSlug(top.slug);
-          window.history.replaceState(null, "", `#/atlas/${top.slug}`);
+          replaceRoute(`/atlas/${top.slug}`);
         }
       }
     },
     [filter]
   );
-
-  const closeSheet = useCallback(() => {
-    setSheetOpen(false);
-    const trigger = triggerRef.current;
-    if (trigger && trigger.isConnected) {
-      window.requestAnimationFrame(() => trigger.focus({ preventScroll: true }));
-    }
-  }, []);
 
   const handleShowList = useCallback(() => {
     document.getElementById("sites")?.scrollIntoView({
@@ -152,61 +191,65 @@ export default function AtlasPage() {
 
   return (
     <main id="main" className={s.page}>
-      <section className={cx("section", s.head)} aria-labelledby="atlas-title">
-        <div className="section__head">
-          <p className="kicker">PLANETARY ANALOGUE ATLAS · {SITES.length} SITES</p>
-          <h1 className="section__title" id="atlas-title">
-            The atlas
-          </h1>
-          <p className="section__lede">
-            Eighteen places used to rehearse Mars and the Moon. Every score compares the
-            site with its destination, not the two planets with each other.
-          </p>
-          <p className={atlas.stats}>
-            <span>{SITES.length} sites</span>
-            <span>2 destinations</span>
-            <span>{PARAMS.length} parameters</span>
-          </p>
+      <p
+        className={atlas.srOnly}
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        data-announcer="true"
+      >
+        {announcement}
+      </p>
+
+      <section className={cx("section", s.head, atlas.head)} aria-labelledby="atlas-title">
+        <div className={atlas.headGrid}>
+          <div className={atlas.headMain}>
+            <p className="kicker">PLANETARY ANALOGUE ATLAS · {SITES.length} SITES</p>
+            <h1 className="section__title" id="atlas-title">
+              The atlas
+            </h1>
+          </div>
+          <div className={atlas.headAside}>
+            <p className="section__lede">
+              {SITES.length} places used to rehearse Mars and the Moon. Every score compares
+              the site with its destination, not the two planets with each other.
+            </p>
+            <p className={atlas.stats}>
+              <span>{SITES.length} sites</span>
+              <span>{BODIES.length} destinations</span>
+              <span>{PARAMS.length} parameters</span>
+            </p>
+          </div>
         </div>
       </section>
 
+      <div className={atlas.controls}>
+        <div className={atlas.chips} role="group" aria-label="Filter sites by destination">
+          {FILTERS.map((entry) => (
+            <button
+              key={entry.id}
+              type="button"
+              className={atlas.chip}
+              aria-pressed={filter === entry.id}
+              onClick={() => changeFilter(entry.id)}
+            >
+              {entry.label}
+              <span className={atlas.chipCount}>{COUNTS[entry.id]}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className={atlas.legend}>
+          <Rubric className={atlas.rubric} />
+          <p className={atlas.legendNote}>
+            Every site is still Earth. Pressure, gravity and mean temperature keep even the
+            best analogue under 50 out of 100.
+          </p>
+        </div>
+      </div>
+
       <div className={atlas.band}>
         <div className={atlas.globeCol}>
-          <div className={atlas.globeBar}>
-            <div className={atlas.chips} role="group" aria-label="Filter sites by destination">
-              {FILTERS.map((entry) => (
-                <button
-                  key={entry.id}
-                  type="button"
-                  className={atlas.chip}
-                  aria-pressed={filter === entry.id}
-                  onClick={() => changeFilter(entry.id)}
-                >
-                  {entry.label}
-                  <span className={atlas.chipCount}>{COUNTS[entry.id]}</span>
-                </button>
-              ))}
-            </div>
-
-            <div className={atlas.legend}>
-              <p className={atlas.rubric}>
-                {RUBRIC_PARTS.map((part, index) => (
-                  <Fragment key={part}>
-                    {index > 0 ? " " : null}
-                    <span>
-                      {part}
-                      {index < RUBRIC_PARTS.length - 1 ? " ·" : ""}
-                    </span>
-                  </Fragment>
-                ))}
-              </p>
-              <p className={atlas.legendNote}>
-                Every site is still Earth. Pressure, gravity and mean temperature keep even
-                the best analogue under 50 out of 100.
-              </p>
-            </div>
-          </div>
-
           <div className={atlas.globeWrap}>
             <Globe
               sites={SITES}
@@ -235,6 +278,7 @@ export default function AtlasPage() {
       {!isDesktop ? (
         <div
           className={atlas.backdrop}
+          data-backdrop="true"
           data-open={sheetOpen ? "true" : "false"}
           onClick={closeSheet}
           aria-hidden="true"
@@ -247,12 +291,20 @@ export default function AtlasPage() {
           <h2 className="section__title" id="ranked-title">
             All sites, ranked
           </h2>
+          <p className={atlas.sortNote}>Ranked by {BODY_NAME[rankBody]} match</p>
         </div>
 
-        <div className={atlas.tableWrap}>
+        <p className={atlas.swipeHint}>Swipe for Moon →</p>
+
+        <div
+          className={atlas.tableWrap}
+          tabIndex={0}
+          role="region"
+          aria-label={`All sites ranked by ${BODY_NAME[rankBody]} match`}
+        >
           <table className={atlas.table}>
             <caption className={atlas.srOnly}>
-              All {SITES.length} analogue sites, ranked by {BODY_LABEL[rankBody]} similarity.
+              All {SITES.length} analogue sites, ranked by {BODY_NAME[rankBody]} similarity.
             </caption>
             <thead>
               <tr>
@@ -296,7 +348,7 @@ export default function AtlasPage() {
                     <td className={atlas.targets}>
                       {site.targets.map((target) => (
                         <span key={target} data-body={target}>
-                          {BODY_LABEL[target]}
+                          {BODY_NAME[target]}
                         </span>
                       ))}
                     </td>
@@ -326,7 +378,7 @@ export default function AtlasPage() {
         <div className={atlas.refWrap}>
           <table className={atlas.refTable}>
             <caption className={atlas.srOnly}>
-              Mars and Moon reference values for the seven parameters and gravity.
+              Mars and Moon reference values for the {PARAMS.length} parameters and gravity.
             </caption>
             <thead>
               <tr>

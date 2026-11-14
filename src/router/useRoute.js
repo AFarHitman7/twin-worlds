@@ -44,6 +44,12 @@ export function navigate(path) {
   window.location.hash = path.startsWith("/") ? `#${path}` : `#/${path}`;
 }
 
+/** Replace the current history entry instead of adding one. */
+export function replaceRoute(path) {
+  if (typeof window === "undefined") return;
+  window.history.replaceState(null, "", `#${path}`);
+}
+
 export function scrollToTop() {
   if (typeof window === "undefined") return;
   try {

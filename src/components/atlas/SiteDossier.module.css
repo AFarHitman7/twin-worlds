@@ -1,7 +1,8 @@
 /* ============================================================
    THE DOSSIER — one site, the whole record.
-   Desktop: the second column of the band, scrolling inside itself.
-   Under 1024 px: the same markup, docked as a bottom sheet.
+   Desktop: the second column of the band, growing with its content
+   beside the sticky globe. Under 1024 px: the same markup, docked
+   as a bottom sheet with its own scroll.
    ============================================================ */
 
 .card {
@@ -9,7 +10,6 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
-  max-height: calc(100vh - var(--nav-h) - 3rem);
   overflow: hidden;
   background: linear-gradient(180deg, var(--panel-2), var(--panel));
   border: 1px solid var(--line);
@@ -21,9 +21,6 @@
 .card[data-body="both"] { --accent: var(--sun); }
 
 .body {
-  min-height: 0;
-  overflow-y: auto;
-  scrollbar-gutter: stable;
   padding: clamp(1.25rem, 2vw, 1.75rem);
 }
 
@@ -78,6 +75,14 @@
     transform 340ms var(--ease-out),
     visibility 0s linear 340ms;
   will-change: transform;
+}
+
+/* Only the sheet scrolls inside itself; on desktop the card grows with its
+   content and the page scrolls, so the globe can stay put beside it. */
+.card[data-dialog="true"] .body {
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
 }
 
 .card[data-dialog="true"][data-open="true"] {

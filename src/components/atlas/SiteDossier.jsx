@@ -1,8 +1,8 @@
-import { Fragment, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { PARAMS, overallScore } from "../../lib/similarity.js";
 import ParamTable from "./ParamTable.jsx";
+import Rubric from "./Rubric.jsx";
 import SimilarityRing from "./SimilarityRing.jsx";
-import { RUBRIC_PARTS } from "./rubric.js";
 import { cx } from "../../lib/cx.js";
 import s from "./SiteDossier.module.css";
 
@@ -22,7 +22,8 @@ const PROSE = [
 
 /**
  * The full record for one site. On desktop it is the second column of the band
- * and scrolls inside itself; under 1024 px the same markup is the bottom sheet.
+ * and grows with its content beside the sticky globe; under 1024 px the same
+ * markup is the bottom sheet, with its own scroll.
  */
 export default function SiteDossier({ site, dialog = false, open = false, onClose }) {
   const cardRef = useRef(null);
@@ -33,8 +34,13 @@ export default function SiteDossier({ site, dialog = false, open = false, onClos
   useEffect(() => {
     if (!dialog || !open) return undefined;
 
+    // Without the page scrollbar the layout would shift sideways; hold the
+    // column where it was for as long as the sheet is open.
+    const scrollbar = window.innerWidth - document.documentElement.clientWidth;
     const previousOverflow = document.body.style.overflow;
+    const previousPadding = document.body.style.paddingRight;
     document.body.style.overflow = "hidden";
+    if (scrollbar > 0) document.body.style.paddingRight = `${scrollbar}px`;
     closeRef.current?.focus({ preventScroll: true });
 
     const onKeyDown = (event) => {
@@ -66,8 +72,38 @@ export default function SiteDossier({ site, dialog = false, open = false, onClos
     return () => {
       document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = previousOverflow;
+      document.body.style.paddingRight = previousPadding;
     };
   }, [dialog, open, onClose]);
+
+  // While the sheet is open, everything off the sheet's ancestor chain is
+  // inert: the nav, the globe, the list and the footer cannot be reached or
+  // clicked behind it. The sheet itself and its backdrop stay live.
+  useEffect(() => {
+    if (!dialog || !open) return undefined;
+    const sheet = cardRef.current;
+    if (!sheet) return undefined;
+
+    const madeInert = [];
+    let node = sheet;
+    while (node && node !== document.body) {
+      const parent = node.parentElement;
+      if (!parent) break;
+      for (const sibling of parent.children) {
+        if (sibling === node) continue;
+        if (sibling.dataset.backdrop === "true") continue;
+        if (sibling.dataset.announcer === "true") continue;
+        if (sibling.inert) continue;
+        sibling.inert = true;
+        madeInert.push(sibling);
+      }
+      node = parent;
+    }
+
+    return () => {
+      for (const element of madeInert) element.inert = false;
+    };
+  }, [dialog, open]);
 
   if (!site) return null;
 
@@ -144,18 +180,10 @@ export default function SiteDossier({ site, dialog = false, open = false, onClos
           <details className={s.how}>
             <summary>How these are scored</summary>
             <div className={s.howBody}>
-              <p className={s.rubric}>
-                {RUBRIC_PARTS.map((part, index) => (
-                  <Fragment key={part}>
-                    {index > 0 ? " " : null}
-                    <span>
-                      {part}
-                      {index < RUBRIC_PARTS.length - 1 ? " ·" : ""}
-                    </span>
-                  </Fragment>
-                ))}
+              <Rubric className={s.rubric} />
+              <p>
+                Each score is a weighted mean of {PARAMS.length} parameters: {PARAM_LIST}.
               </p>
-              <p>Each score is a weighted mean of seven parameters: {PARAM_LIST}.</p>
             </div>
           </details>
         </div>

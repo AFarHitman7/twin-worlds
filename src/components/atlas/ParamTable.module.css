@@ -1,6 +1,8 @@
 /* The parameter table is a grid rather than a native table: the note under
-   each row spans the full width, and the dossier column is narrow enough that
-   the bars must restack. Container queries follow the column, not the page. */
+   each row spans the width, and the dossier column is narrow enough that the
+   bars must restack. The ARIA table model is explicit: four cells per data
+   row, the note in its own row with one cell spanning four columns.
+   Container queries follow the column, not the page. */
 .wrap {
   container-type: inline-size;
   margin-top: 1.6rem;
@@ -13,7 +15,7 @@
 
 .head {
   display: grid;
-  grid-template-columns: 1.25fr 1fr 64px 64px;
+  grid-template-columns: 1.25fr 1fr 76px 76px;
   gap: 0.5rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid var(--line-strong);
@@ -35,11 +37,10 @@
 
 .row {
   display: grid;
-  grid-template-columns: 1.25fr 1fr 64px 64px;
+  grid-template-columns: 1.25fr 1fr 76px 76px;
   gap: 0 0.5rem;
   align-items: center;
-  padding: 0.6rem 0;
-  border-bottom: 1px solid var(--line);
+  padding-top: 0.6rem;
 }
 
 .label {
@@ -78,8 +79,7 @@
 }
 
 .track {
-  flex: 0 1 56px;
-  min-width: 18px;
+  flex: 0 0 56px;
   height: 4px;
   border-radius: 999px;
   background: var(--line);
@@ -104,9 +104,13 @@
   text-align: right;
 }
 
+.noteRow {
+  padding: 0.4rem 0 0.6rem;
+  border-bottom: 1px solid var(--line);
+}
+
 .note {
-  grid-column: 1 / -1;
-  margin-top: 0.4rem;
+  display: block;
   font-size: var(--text-micro);
   line-height: 1.55;
   color: var(--faint);
@@ -153,9 +157,10 @@
   text-transform: uppercase;
 }
 
-/* Narrow dossier: label and Earth value share a line, the two bars stack
-   under them, and each bar carries its own destination tag. */
-@container (max-width: 360px) {
+/* Narrow dossier: label and Earth value share a line with the value kept on
+   one line, the two bars stack under them, and each bar carries its own
+   destination tag. */
+@container (max-width: 420px) {
   .head {
     position: absolute;
     width: 1px;
@@ -170,16 +175,18 @@
     grid-template-areas:
       "label value"
       "mars mars"
-      "moon moon"
-      "note note";
+      "moon moon";
     gap: 0.4rem 0.75rem;
   }
 
   .label { grid-area: label; }
-  .value { grid-area: value; text-align: right; }
+  .value {
+    grid-area: value;
+    text-align: right;
+    white-space: nowrap;
+  }
   .barCell[data-body="mars"] { grid-area: mars; }
   .barCell[data-body="moon"] { grid-area: moon; }
-  .note { grid-area: note; }
 
   .bodyTag { display: inline-block; }
   .track { flex: 0 0 56px; }

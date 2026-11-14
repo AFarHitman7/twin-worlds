@@ -1,14 +1,39 @@
 /* ============================================================
-   ATLAS — the band, the list, the reference table.
+   ATLAS — the head, the controls, the band, the list, the reference.
    The dossier and the rings carry their own modules.
    ============================================================ */
+
+/* A compact head: the atlas opens on the globe, not on empty air. */
+.head {
+  padding-top: clamp(1.75rem, 3vw, 2.5rem);
+  padding-bottom: clamp(0.9rem, 1.5vw, 1.25rem);
+}
+
+.headGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: start;
+}
+
+.headMain .kicker {
+  display: flex;
+}
+
+.headMain h1 {
+  margin-bottom: 0;
+}
+
+.headAside .section__lede {
+  max-width: 60ch;
+}
 
 .stats {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.4rem 0.9rem;
-  margin-top: 1.6rem;
+  margin-top: 1.4rem;
   font-family: var(--font-mono);
   font-size: var(--text-micro);
   font-weight: 500;
@@ -23,40 +48,18 @@
   border-left: 1px solid var(--line-strong);
 }
 
-/* ------------------------------------------------------- main band: 7 + 5 */
+/* ------------------------------------------------------------- controls */
 
-.band {
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  align-items: start;
-  gap: clamp(1.5rem, 3vw, 2.5rem);
-  width: 100%;
-  max-width: var(--max-w);
-  min-height: 640px;
-  margin: 0 auto;
-  padding-inline: clamp(1.25rem, 4vw, 2rem);
-}
-
-.globeCol {
-  position: sticky;
-  top: calc(var(--nav-h) + 1.5rem);
-  align-self: start;
-  grid-column: span 7;
-  min-width: 0;
-}
-
-.dossierCol {
-  grid-column: span 5;
-  min-width: 0;
-}
-
-.globeBar {
+.controls {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 1.25rem 2rem;
-  margin-bottom: 1.1rem;
+  gap: 1rem 2rem;
+  width: 100%;
+  max-width: var(--max-w);
+  margin: 0 auto 1rem;
+  padding-inline: clamp(1.25rem, 4vw, 2rem);
 }
 
 .chips {
@@ -100,30 +103,55 @@
 }
 
 .legend {
-  max-width: 34rem;
+  flex: 1 1 0;
+  min-width: 0;
   margin-left: auto;
   text-align: right;
 }
 
 .rubric {
   font-family: var(--font-mono);
-  font-size: var(--text-micro);
+  font-size: 10px;
   font-weight: 500;
-  letter-spacing: 0.1em;
-  line-height: 1.7;
+  letter-spacing: 0.06em;
+  line-height: 1.6;
   color: var(--faint);
+  white-space: nowrap;
 }
 
-.rubric span { white-space: nowrap; }
-
 .legendNote {
-  max-width: 42ch;
-  margin-top: 0.45rem;
+  margin-top: 0.4rem;
   margin-left: auto;
   font-size: 0.8125rem;
-  line-height: 1.55;
+  line-height: 1.5;
   color: var(--muted);
   text-wrap: pretty;
+}
+
+/* ------------------------------------------------------- main band: 7 + 5 */
+
+.band {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-items: start;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  width: 100%;
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding-inline: clamp(1.25rem, 4vw, 2rem);
+}
+
+.globeCol {
+  position: sticky;
+  top: calc(var(--nav-h) + 1.5rem);
+  align-self: start;
+  grid-column: span 7;
+  min-width: 0;
+}
+
+.dossierCol {
+  grid-column: span 5;
+  min-width: 0;
 }
 
 .globeWrap {
@@ -159,6 +187,28 @@
 }
 
 /* ---------------------------------------------------------- ranked table */
+
+.sortNote {
+  margin-top: 0.9rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  line-height: 1.5;
+  color: var(--faint);
+}
+
+.swipeHint {
+  display: none;
+  margin: 0 0 0.5rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  line-height: 1.5;
+  color: var(--faint);
+  text-align: right;
+}
 
 .tableWrap {
   overflow-x: auto;
@@ -370,29 +420,44 @@
 /* ----------------------------------------------------------- narrow page */
 
 @media (max-width: 1023px) {
-  .band {
+  .headGrid {
     display: block;
-    min-height: 0;
   }
 
-  .globeCol {
-    position: static;
+  .headAside {
+    margin-top: 1.05rem;
   }
 
-  .globeBar {
+  .controls {
     flex-direction: column;
     align-items: stretch;
-    gap: 1rem;
+    gap: 0.9rem;
   }
 
   .legend {
-    max-width: none;
+    flex: 0 0 auto;
     margin-left: 0;
     text-align: left;
   }
 
+  .rubric {
+    font-size: var(--text-micro);
+    letter-spacing: 0.1em;
+    line-height: 1.7;
+    white-space: normal;
+  }
+
   .legendNote {
+    max-width: 46ch;
     margin-left: 0;
+  }
+
+  .band {
+    display: block;
+  }
+
+  .globeCol {
+    position: static;
   }
 
   .globeWrap {
@@ -404,6 +469,10 @@
 @media (max-width: 720px) {
   .regionCol {
     display: none;
+  }
+
+  .swipeHint {
+    display: block;
   }
 
   .table {

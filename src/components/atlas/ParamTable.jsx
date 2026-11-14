@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { PARAMS } from "../../lib/similarity.js";
 import { GRAVITY } from "./rubric.js";
 import s from "./ParamTable.module.css";
@@ -44,23 +45,27 @@ export default function ParamTable({ site }) {
             const entry = site.params[param.key];
             if (!entry) return null;
             return (
-              <div className={s.row} role="row" key={param.key}>
-                <span className={s.label} role="cell">
-                  {param.label}
-                </span>
-                <span className={s.value} role="cell">
-                  {entry.value}
-                </span>
-                <span className={s.barCell} data-body="mars" role="cell">
-                  <Bar body="mars" value={entry.mars} />
-                </span>
-                <span className={s.barCell} data-body="moon" role="cell">
-                  <Bar body="moon" value={entry.moon} />
-                </span>
-                <span className={s.note} role="cell" aria-colspan={4}>
-                  {entry.note}
-                </span>
-              </div>
+              <Fragment key={param.key}>
+                <div className={s.row} role="row">
+                  <span className={s.label} role="cell">
+                    {param.label}
+                  </span>
+                  <span className={s.value} role="cell">
+                    {entry.value}
+                  </span>
+                  <span className={s.barCell} data-body="mars" role="cell">
+                    <Bar body="mars" value={entry.mars} />
+                  </span>
+                  <span className={s.barCell} data-body="moon" role="cell">
+                    <Bar body="moon" value={entry.moon} />
+                  </span>
+                </div>
+                <div className={s.noteRow} role="row">
+                  <span className={s.note} role="cell" aria-colspan={4}>
+                    {entry.note}
+                  </span>
+                </div>
+              </Fragment>
             );
           })}
         </div>
