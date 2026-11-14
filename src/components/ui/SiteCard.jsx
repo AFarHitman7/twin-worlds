@@ -4,12 +4,12 @@ import { cx } from "../../lib/cx.js";
 import Reveal from "./Reveal.jsx";
 import s from "./SiteCard.module.css";
 
-export default function SiteCard({ site, planet, delay = 0, className }) {
+export default function SiteCard({ site, planet, delay = 0, className, href }) {
   const fine = useFinePointer();
   const reduced = useReducedMotion();
   const tilt = useTilt(fine && !reduced);
 
-  return (
+  const card = (
     <Reveal
       as="article"
       className={cx("tilt", s.card, className)}
@@ -36,7 +36,16 @@ export default function SiteCard({ site, planet, delay = 0, className }) {
           <b>Reality check</b> {site.reality}
         </p>
         <p className={s.source}>{site.source}</p>
+        {href ? <span className={s.open}>Open dossier →</span> : null}
       </div>
     </Reveal>
+  );
+
+  if (!href) return card;
+
+  return (
+    <a className={s.link} href={href} aria-label={`Open dossier for ${site.title}`}>
+      {card}
+    </a>
   );
 }

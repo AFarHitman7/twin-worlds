@@ -1,71 +1,10 @@
-export const MARS_SITES = [
-  {
-    country: "Chile",
-    type: "Hyperarid · Rover testing",
-    title: "Atacama Desert",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Anfiteatro%2C_Valle_de_la_Luna%2C_San_Pedro_de_Atacama%2C_Chile%2C_2016-02-01%2C_DD_149.JPG/1280px-Anfiteatro%2C_Valle_de_la_Luna%2C_San_Pedro_de_Atacama%2C_Chile%2C_2016-02-01%2C_DD_149.JPG",
-    alt: "Bare banded hills in the Atacama desert, Chile",
-    coord: "22.9°S · 68.2°W",
-    text: "The driest non-polar desert on Earth. Instruments for Viking, Phoenix and ExoMars were tested in its Mars-like soils.",
-    reality: "Still has an oxygen atmosphere and rare rain.",
-    source: "ESA Catalogue · ch. 2",
-  },
-  {
-    country: "Antarctica",
-    type: "Cold desert · Astrobiology",
-    title: "McMurdo Dry Valleys",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Gargoyle_Ridge_in_the_McMurdo_Dry_Valleys_in_Antarctica_%2830877661786%29.jpg/1280px-Gargoyle_Ridge_in_the_McMurdo_Dry_Valleys_in_Antarctica_%2830877661786%29.jpg",
-    alt: "Bare rocky ridge in the McMurdo Dry Valleys, Antarctica",
-    coord: "77.5°S · 162.3°E",
-    text: "Snow-free valleys that may not have seen rain for millions of years. Blood Falls stains the ice red with iron-rich brine.",
-    reality: "Summer meltwater and an oxygen atmosphere.",
-    source: "ESA Catalogue · ch. 1",
-  },
-  {
-    country: "Canada",
-    type: "Impact · Isolation",
-    title: "Haughton Crater, Devon Island",
-    img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/70/Flying_over_Devon_Island_%282665527817%29.jpg/1280px-Flying_over_Devon_Island_%282665527817%29.jpg",
-    alt: "Aerial view of the barren Devon Island, Canada",
-    coord: "75.4°N · 89.7°W",
-    text: "A 23\u00a0km impact structure in a polar desert. NASA’s Haughton-Mars Project tests habitats and communication delay here.",
-    reality: "Earth gravity and slow polar weathering.",
-    source: "ESA Catalogue · ch. 10",
-  },
-  {
-    country: "Iceland",
-    type: "Volcanic · Rover testing",
-    title: "Holuhraun & Krafla",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Artemis_II_Crew_geology_training_in_Iceland_-_jsc2024e055198.jpg/1280px-Artemis_II_Crew_geology_training_in_Iceland_-_jsc2024e055198.jpg",
-    alt: "Astronauts training on dark volcanic rock in Iceland",
-    coord: "64.9°N · 19.0°W",
-    text: "Fissure-fed lava fields and altered basalt. Apollo crews trained here, and a Mars 2020 rover prototype was tested in 2019.",
-    reality: "Active ice and water, and an atmosphere.",
-    source: "ESA Catalogue · ch. 12",
-  },
-  {
-    country: "Spain",
-    type: "Volcanic · Lava tubes",
-    title: "Timanfaya, Lanzarote",
-    img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/72/Timanfaya_-_Lanzarote_02.jpg/1280px-Timanfaya_-_Lanzarote_02.jpg",
-    alt: "Dark volcanic terrain of Timanfaya, Lanzarote",
-    coord: "29.0°N · 13.6°W",
-    text: "Pristine 18th-century lava and tubes. ESA’s Pangaea course trains astronauts in field geology on this island.",
-    reality: "An atmosphere and vegetation nearby.",
-    source: "ESA Pangaea · Planetary Analogue Catalogue",
-  },
-  {
-    country: "Spain",
-    type: "Mineralogical · Astrobiology",
-    title: "Río Tinto",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/IronInRocksMakeRiverRed.jpg/1280px-IronInRocksMakeRiverRed.jpg",
-    alt: "The red, iron-rich water of the Rio Tinto in Spain",
-    coord: "37.7°N · 6.6°W",
-    text: "An acidic, iron-rich river precipitating jarosite and hematite, minerals also found at Meridiani Planum on Mars.",
-    reality: "The acidity comes from pyrite mining runoff, not Martian groundwater.",
-    source: "ESA Catalogue · ch. 23",
-  },
-];
+import { SITES } from "./atlas.js";
+
+const featuredFor = (target) =>
+  SITES.filter((site) => site.featured && site.targets.includes(target));
+
+// The landing sections show the six featured sites for each body, in atlas order.
+export const MARS_SITES = featuredFor("mars");
 
 export const MARS_ALSO = [
   "Dallol, Ethiopia",
@@ -77,74 +16,7 @@ export const MARS_ALSO = [
   "Boulby, UK",
 ];
 
-export const MOON_SITES = [
-  {
-    country: "USA",
-    type: "Volcanic · Apollo training",
-    title: "Craters of the Moon, Idaho",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Cinder_cone_complex_%28Holocene%2C_~2.4_ka%3B_Big_Craters%2C_Craters_of_the_Moon_Lava_Field%2C_Snake_River_Plain%2C_Idaho%2C_USA%29_7.jpg/1280px-Cinder_cone_complex_%28Holocene%2C_~2.4_ka%3B_Big_Craters%2C_Craters_of_the_Moon_Lava_Field%2C_Snake_River_Plain%2C_Idaho%2C_USA%29_7.jpg",
-    alt: "Black cinder cones of Craters of the Moon, Idaho",
-    coord: "43.4°N · 113.5°W",
-    text: "A sea of young basalt. Apollo 14 astronauts trained here to read volcanic terrain before walking on the Moon.",
-    reality: "Earth gravity and a thin atmosphere.",
-    source: "National Park Service · mission history",
-  },
-  {
-    country: "USA",
-    type: "Impact · Apollo training",
-    title: "Cinder Lake Crater Field",
-    img: "https://upload.wikimedia.org/wikipedia/commons/0/03/Cinder_Lake_Crater_Field_1.jpg",
-    alt: "The man-made Cinder Lake crater field in Arizona",
-    coord: "35.3°N · 111.5°W",
-    text: "A crater field built in the 1960s from a Lunar Orbiter image, so Apollo crews could practise on the ground.",
-    reality: "Man-made, and far smaller than lunar crater fields.",
-    source: "ESA Catalogue · ch. 7",
-  },
-  {
-    country: "USA",
-    type: "Impact · Geology training",
-    title: "Meteor Crater, Arizona",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/2019_Meteor_Crater%2C_Arizona.jpg/1280px-2019_Meteor_Crater%2C_Arizona.jpg",
-    alt: "The vast bowl of Meteor Crater in Arizona",
-    coord: "35.0°N · 111.0°W",
-    text: "A 1.2\u00a0km bowl roughly 50,000 years old. Astronauts studied impact geology here before the Apollo missions.",
-    reality: "Earth gravity and weathering.",
-    source: "ESA Catalogue · ch. 16",
-  },
-  {
-    country: "USA",
-    type: "Volcanic · Instrument testing",
-    title: "Mauna Kea, Hawaii",
-    img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/de/Mauna_Kea_Summit_%28503893%29_%2821743654782%29.jpg/1280px-Mauna_Kea_Summit_%28503893%29_%2821743654782%29.jpg",
-    alt: "Barren volcanic summit of Mauna Kea, Hawaii",
-    coord: "19.8°N · 155.5°W",
-    text: "Apollo astronauts trained on these cinder slopes. NASA later tested lunar instruments and ISRU equipment here.",
-    reality: "An atmosphere, water, and cultural access limits.",
-    source: "Planetary Analogue Catalogue",
-  },
-  {
-    country: "Iceland",
-    type: "Volcanic · Apollo training",
-    title: "Askja & Lambahraun",
-    img: "https://upload.wikimedia.org/wikipedia/commons/2/2f/Viti_Crater_Askja_Iceland_UL1.jpg",
-    alt: "The blue crater lake of Askja, Iceland",
-    coord: "65.0°N · 16.7°W",
-    text: "Black sands and craters where Apollo 11 and 12 crews learned field geology in the 1960s.",
-    reality: "Ice, water and an atmosphere.",
-    source: "ESA Catalogue · ch. 12",
-  },
-  {
-    country: "USA",
-    type: "Lava tubes · Modelling",
-    title: "Lava Beds National Monument",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/A114%2C_Lava_Beds_National_Monument%2C_California%2C_USA%2C_Golden_Dome_Lava_Tube_Cave%2C_2004.jpg/1280px-A114%2C_Lava_Beds_National_Monument%2C_California%2C_USA%2C_Golden_Dome_Lava_Tube_Cave%2C_2004.jpg",
-    alt: "A lava tube cave in Lava Beds National Monument, California",
-    coord: "41.7°N · 121.5°W",
-    text: "Basaltic tubes and skylights used to model how lunar lava tubes could be mapped and eventually built in.",
-    reality: "Terrestrial tubes are about 30\u00a0m wide, far smaller than lunar ones.",
-    source: "Planetary Analogue Catalogue",
-  },
-];
+export const MOON_SITES = featuredFor("moon");
 
 export const MOON_ALSO = [
   "Lanzarote, Spain",

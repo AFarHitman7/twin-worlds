@@ -22,7 +22,13 @@ export default function Mars() {
 
       <div className={s.grid}>
         {MARS_SITES.map((site, i) => (
-          <SiteCard site={site} planet="mars" delay={i * 80} key={site.title} />
+          <SiteCard
+            site={site}
+            planet="mars"
+            delay={i * 80}
+            href={"#/atlas/" + site.slug}
+            key={site.title}
+          />
         ))}
       </div>
 
