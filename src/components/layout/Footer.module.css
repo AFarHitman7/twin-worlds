@@ -1,0 +1,44 @@
+.footer {
+  border-top: 1px solid var(--line); padding: 3rem clamp(1.25rem, 4vw, 2rem) 5rem;
+  text-align: center; color: var(--faint); font-size: 0.9rem; position: relative; overflow: hidden;
+}
+.giant {
+  font-family: var(--font-huge); font-weight: 200;
+  font-size: clamp(2.2rem, 12vw, 9rem);
+  line-height: 1; white-space: nowrap;
+  background: linear-gradient(178deg, rgba(236,239,244,0.24), rgba(236,239,244,0.055) 60%, rgba(217,164,91,0.17));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  -webkit-text-stroke: 1px rgba(236,239,244,0.05);
+  paint-order: stroke fill;
+  margin-bottom: 1.5rem; user-select: none;
+  letter-spacing: -0.03em;
+  font-optical-sizing: auto;
+  font-feature-settings: "cv02" 1, "cv03" 1, "cv04" 1, "cv05" 1;
+}
+.brand { font-family: var(--font-display); font-weight: 500; font-size: 0.8125rem; letter-spacing: 0.22em; color: var(--text); margin-bottom: 0.8rem; text-wrap: balance; }
+.note { max-width: 60ch; margin: 0 auto 0.4rem; line-height: 1.65; }
+.fine { font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: 0.07em; line-height: 1.9; }
+.fine a {
+  color: var(--sun);
+  text-decoration: underline;
+  text-decoration-thickness: from-font;
+  text-underline-offset: 0.28em;
+  text-decoration-color: rgba(217, 164, 91, 0.4);
+  text-decoration-skip-ink: auto;
+  transition: text-decoration-color 200ms, color 200ms;
+}
+.fine a:hover { color: #fff; text-decoration-color: var(--sun); }
+
+@media (max-width: 480px) {
+  .brand { letter-spacing: 0.18em; }
+}
+
+@media (forced-colors: active) {
+  .giant {
+    background: none;
+    -webkit-text-fill-color: currentColor;
+    color: CanvasText;
+    filter: none;
+    -webkit-text-stroke: 0;
+  }
+}

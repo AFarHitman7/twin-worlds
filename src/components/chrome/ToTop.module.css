@@ -1,0 +1,10 @@
+.toTop {
+  position: fixed; right: 1.3rem; bottom: 1.3rem; z-index: 115;
+  width: 52px; height: 52px; border-radius: 50%; border: 1px solid var(--line-strong);
+  background: rgba(8,11,19,0.85); backdrop-filter: blur(10px);
+  font-size: 1.3rem; color: #fff;
+  opacity: 0; visibility: hidden; transform: translateY(12px);
+  transition: opacity 300ms, transform 300ms, visibility 300ms, border-color 250ms;
+}
+.isShow { opacity: 1; visibility: visible; transform: none; }
+.toTop:hover { border-color: var(--sun); transform: translateY(-3px); }

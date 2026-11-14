@@ -1,0 +1,62 @@
+export const WORLDS = [
+  {
+    key: "earth",
+    planet: "var(--earth)",
+    img: "https://commons.wikimedia.org/wiki/Special:FilePath/The%20Earth%20seen%20from%20Apollo%2017.jpg?width=1200",
+    alt: "Earth seen from space, the Blue Marble photograph",
+    tag: "● Home",
+    index: "E.01",
+    name: "Earth",
+    desc: "A living world of oceans, clouds and life, the only place we know where it all came together.",
+    stats: [
+      ["Diameter", "12,742\u00a0km"],
+      ["Gravity", "1.00\u00a0g"],
+      ["Mean temp", "15\u00a0°C"],
+      ["Day / year", "24\u00a0h · 365\u00a0d"],
+      ["From Earth", "Home"],
+      ["Moons", "1"],
+    ],
+  },
+  {
+    key: "mars",
+    planet: "var(--mars)",
+    img: "https://commons.wikimedia.org/wiki/Special:FilePath/OSIRIS%20Mars%20true%20color.jpg?width=1200",
+    alt: "The full disc of Mars in true colour",
+    tag: "● The red one",
+    index: "M.02",
+    name: "Mars",
+    desc: "A cold desert world, rusted red by iron oxide. It once held rivers and may hide water ice today.",
+    stats: [
+      ["Diameter", "6,779\u00a0km"],
+      ["Gravity", "0.38\u00a0g"],
+      ["Mean temp", "−63\u00a0°C"],
+      ["Day / year", "24.6\u00a0h · 687\u00a0d"],
+      ["From Earth", "~225M\u00a0km"],
+      ["Moons", "2"],
+    ],
+  },
+  {
+    key: "moon",
+    planet: "var(--moon)",
+    img: "https://commons.wikimedia.org/wiki/Special:FilePath/FullMoon2010.jpg?width=1200",
+    alt: "The full Moon",
+    tag: "● Nearest neighbour",
+    index: "L.03",
+    name: "The Moon",
+    desc: "A still, grey world of ancient lava plains and craters, locked in orbit around Earth.",
+    stats: [
+      ["Diameter", "3,474\u00a0km"],
+      ["Gravity", "0.17\u00a0g"],
+      ["Mean temp", "−20\u00a0°C"],
+      ["Rotation", "27.3\u00a0d"],
+      ["From Earth", "384,400\u00a0km"],
+      ["Moons", "0"],
+    ],
+  },
+];
+
+export const GRAVITY = [
+  { name: "Earth", width: "100%", value: "1.00\u00a0g", delay: "0ms", planet: "var(--earth)" },
+  { name: "Mars", width: "38%", value: "0.38\u00a0g", delay: "120ms", planet: "var(--mars)" },
+  { name: "Moon", width: "17%", value: "0.17\u00a0g", delay: "240ms", planet: "var(--moon)" },
+];

@@ -1,0 +1,44 @@
+.nebula {
+  position: fixed; inset: 0; z-index: -5; pointer-events: none;
+  background:
+    radial-gradient(55% 42% at 12% -5%, rgba(106, 168, 255, 0.1), transparent 62%),
+    radial-gradient(48% 40% at 98% 24%, rgba(201, 107, 74, 0.08), transparent 62%),
+    radial-gradient(50% 44% at 50% 114%, rgba(141, 155, 214, 0.09), transparent 62%);
+  animation: nebulaDrift 30s ease-in-out infinite alternate;
+}
+@keyframes nebulaDrift {
+  from { transform: scale(1) translateY(0); }
+  to { transform: scale(1.08) translateY(-1.5%); }
+}
+
+/* faint deep-space dust clouds, desaturated — not neon */
+.aurora { position: fixed; inset: 0; z-index: -3; overflow: hidden; pointer-events: none; opacity: 0.42; filter: blur(70px); }
+.aurora span { position: absolute; width: 55vmax; height: 55vmax; border-radius: 50%; }
+.aurora .a1 { background: radial-gradient(circle, rgba(80,110,170,0.32), transparent 65%); top: -18%; left: -12%; animation: drift1 26s ease-in-out infinite alternate; }
+.aurora .a2 { background: radial-gradient(circle, rgba(170,110,70,0.24), transparent 65%); top: 8%; right: -16%; animation: drift2 32s ease-in-out infinite alternate; }
+.aurora .a3 { background: radial-gradient(circle, rgba(120,130,175,0.3), transparent 65%); bottom: -24%; left: 22%; animation: drift3 36s ease-in-out infinite alternate; }
+.aurora .a4 { background: radial-gradient(circle, rgba(200,180,150,0.16), transparent 65%); bottom: -10%; right: 12%; animation: drift1 28s ease-in-out infinite alternate-reverse; }
+@keyframes drift1 { to { transform: translate(8vw, 6vh) scale(1.15); } }
+@keyframes drift2 { to { transform: translate(-7vw, 9vh) scale(0.88); } }
+@keyframes drift3 { to { transform: translate(6vw, -7vh) scale(1.1); } }
+
+/* faint celestial chart grid */
+.grid {
+  position: fixed; inset: 0; z-index: -2; pointer-events: none; opacity: 0.35;
+  background-image:
+    linear-gradient(rgba(180,195,220,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(180,195,220,0.05) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(75% 65% at 50% 30%, #000 25%, transparent 100%);
+  -webkit-mask-image: radial-gradient(75% 65% at 50% 30%, #000 25%, transparent 100%);
+}
+.noise {
+  position: fixed; inset: 0; z-index: 95; pointer-events: none; opacity: 0.07; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.vignette { position: fixed; inset: 0; z-index: 94; pointer-events: none; background: radial-gradient(120% 100% at 50% 45%, transparent 52%, rgba(1,2,5,0.62) 100%); }
+.scanlines { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora span { animation: none !important; }
+}

@@ -1,0 +1,5 @@
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; perspective: 1400px; }
+
+@media (max-width: 900px) {
+  .grid { grid-template-columns: 1fr; --card-media-aspect: 16 / 9; }
+}

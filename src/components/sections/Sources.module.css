@@ -1,0 +1,31 @@
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; perspective: 1200px; }
+.source {
+  position: relative; display: flex; flex-direction: column; gap: 0.35rem; overflow: hidden;
+  padding: 1.4rem 1.35rem; border: 1px solid var(--line); border-radius: var(--radius);
+  background: linear-gradient(170deg, rgba(17,22,35,0.92), rgba(8,11,19,0.55));
+  transition: border-color 250ms, box-shadow 300ms;
+}
+.source:hover { border-color: var(--earth); box-shadow: 0 18px 55px rgba(0,0,0,0.5); }
+.type { font-family: var(--font-mono); font-size: var(--text-micro); font-weight: 500; letter-spacing: 0.14em; line-height: 1.4; text-transform: uppercase; color: var(--sun); }
+.name {
+  font-weight: 600; font-size: 1.0625rem; line-height: 1.35;
+  text-transform: none; text-wrap: balance;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.24em;
+  text-decoration-skip-ink: auto;
+  transition: text-decoration-color 300ms var(--ease-out);
+}
+.source:hover .name {
+  text-decoration-color: color-mix(in srgb, var(--planet, var(--sun)) 65%, transparent);
+}
+.desc { color: var(--muted); font-size: 0.9rem; line-height: 1.6; text-wrap: pretty; }
+.note { margin-top: 1.5rem; color: var(--faint); font-size: 0.84rem; line-height: 1.6; max-width: 72ch; text-wrap: pretty; }
+
+@media (max-width: 1024px) {
+  .grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 720px) {
+  .grid { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,55 @@
+.card {
+  position: relative; background: linear-gradient(170deg, rgba(17,22,35,0.94), rgba(8,11,19,0.6));
+  border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden;
+  transition: border-color 300ms, box-shadow 350ms;
+}
+.card[data-planet="mars"] { --planet: var(--mars); }
+.card[data-planet="moon"] { --planet: var(--moon); }
+.card:hover { border-color: color-mix(in srgb, var(--planet) 60%, white 8%); box-shadow: 0 24px 70px rgba(0,0,0,0.62), 0 0 26px color-mix(in srgb, var(--planet) 20%, transparent); }
+.media { position: relative; aspect-ratio: var(--card-media-aspect, 16 / 10); overflow: hidden; }
+.media img { width: 100%; height: 100%; object-fit: cover; transition: transform 700ms var(--ease-out), filter 500ms; }
+.card:hover .media img { transform: scale(1.08); filter: saturate(1.15) contrast(1.04); }
+.media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, rgba(3,5,9,0.6)); pointer-events: none; }
+.planet {
+  position: absolute; top: 0.75rem; left: 0.75rem; z-index: 2;
+  font-family: var(--font-mono); font-size: var(--text-micro); font-weight: 500;
+  letter-spacing: 0.13em; line-height: 1.4; text-transform: uppercase;
+  color: #fff; background: rgba(3,5,9,0.72); border: 1px solid color-mix(in srgb, var(--planet) 60%, white 5%);
+  border-radius: 4px; padding: 0.32rem 0.7rem; backdrop-filter: blur(6px);
+}
+.coord {
+  position: absolute; bottom: 0.75rem; left: 0.75rem; z-index: 2;
+  font-family: var(--font-mono); font-size: var(--text-micro); font-weight: 500;
+  letter-spacing: 0.09em; font-variant-numeric: tabular-nums; color: var(--sun);
+  background: rgba(3,5,9,0.7); border: 1px solid rgba(255,217,160,0.28); border-radius: 4px;
+  padding: 0.26rem 0.62rem; backdrop-filter: blur(6px);
+}
+.body { padding: 1.25rem; }
+.meta { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 0.2rem 0.75rem; margin-bottom: 0.5rem; }
+.country { font-family: var(--font-mono); font-size: var(--text-micro); font-weight: 500; letter-spacing: 0.13em; text-transform: uppercase; color: var(--faint); }
+.type { font-family: var(--font-mono); font-size: 0.65625rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--planet); text-align: right; }
+.title {
+  font-family: var(--font-display); font-size: 1.125rem; font-weight: 600; letter-spacing: var(--tracking-card); line-height: 1.28; margin-bottom: 0.4rem;
+  text-transform: none; text-wrap: balance;
+}
+.text { color: var(--muted); font-size: 0.9375rem; line-height: 1.62; text-wrap: pretty; margin-bottom: 0.9rem; }
+.reality {
+  font-size: 0.875rem; color: var(--faint); line-height: 1.55;
+  padding: 0.55rem 0.7rem; border-left: 2px solid var(--planet);
+  background: rgba(214,226,240,0.03); border-radius: 0 6px 6px 0; margin-bottom: 0.8rem;
+}
+.reality b { display: block; font-family: var(--font-mono); font-size: 0.65625rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--planet); margin-bottom: 0.22rem; }
+.source { font-family: var(--font-mono); font-size: 0.65625rem; font-weight: 500; letter-spacing: 0.09em; text-transform: uppercase; color: var(--faint); opacity: 0.9; }
+
+/* Quiet title underline, lit by the planet's own colour */
+.title {
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.24em;
+  text-decoration-skip-ink: auto;
+  transition: text-decoration-color 300ms var(--ease-out);
+}
+.card:hover .title {
+  text-decoration-color: color-mix(in srgb, var(--planet, var(--sun)) 65%, transparent);
+}

@@ -1,0 +1,179 @@
+.hero {
+  position: relative; min-height: 100dvh;
+  display: grid; grid-template-columns: 1.1fr 1fr; align-items: center;
+  gap: clamp(1.5rem, 4vw, 3rem);
+  padding: calc(var(--nav-h) + 3rem) clamp(1.25rem, 6vw, 4rem) 6rem;
+  max-width: 1440px; margin: 0 auto; overflow: clip;
+}
+.bgword {
+  position: absolute; top: 12%; left: 0; right: 0; overflow: hidden; pointer-events: none;
+  font-family: var(--font-huge); font-weight: 200; font-size: clamp(4rem, 13vw, 12rem);
+  white-space: nowrap; color: transparent; -webkit-text-stroke: 1px rgba(214,226,240,0.055);
+  letter-spacing: 0;
+  font-optical-sizing: auto;
+  font-feature-settings: "cv02" 1, "cv03" 1, "cv04" 1, "cv05" 1;
+}
+.bgword span { display: inline-block; animation: marqueeBg 48s linear infinite; }
+@keyframes marqueeBg { to { transform: translateX(-33%); } }
+/* slow sun-shafts, warm white */
+.beams { position: absolute; inset: 0; pointer-events: none; }
+.beams span { position: absolute; top: -20%; width: 160px; height: 140%; transform: rotate(16deg); filter: blur(70px); opacity: 0.22; }
+.beams span:nth-child(1) { left: 8%; background: linear-gradient(rgba(207,228,255,0.7), transparent); animation: beamSway 12s ease-in-out infinite alternate; }
+.beams span:nth-child(2) { left: 45%; background: linear-gradient(rgba(255,217,160,0.55), transparent); animation: beamSway 15s ease-in-out infinite alternate-reverse; }
+.beams span:nth-child(3) { right: 6%; background: linear-gradient(rgba(201,107,74,0.5), transparent); animation: beamSway 13s ease-in-out infinite alternate; }
+@keyframes beamSway { to { transform: rotate(13deg) translateX(50px); opacity: 0.32; } }
+
+.copy { max-width: 640px; position: relative; z-index: 2; }
+.badge {
+  display: inline-flex; align-items: center; gap: 0.7rem;
+  font-family: var(--font-mono); font-size: var(--text-micro); font-weight: 500;
+  letter-spacing: var(--tracking-label); line-height: 1.4;
+  padding: 0; border: none; border-radius: 0; color: var(--muted); background: none;
+  margin-bottom: 1.6rem; position: relative;
+}
+.badge::after { content: ""; display: block; width: 3rem; height: 1px; background: linear-gradient(90deg, var(--line-strong), transparent); }
+.pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--success); box-shadow: 0 0 8px rgba(143,214,164,0.8); animation: blink 1.8s infinite; }
+@keyframes blink { 50% { opacity: 0.35; } }
+.title {
+  font-family: var(--font-huge);
+  font-size: var(--text-hero); font-weight: 250;
+  letter-spacing: var(--tracking-display); line-height: var(--leading-display);
+  text-wrap: balance; margin: 0 0 1.4rem;
+  text-shadow: 0 6px 44px rgba(0,0,0,0.78);
+  font-optical-sizing: auto;
+  font-feature-settings: "cv02" 1, "cv03" 1, "cv04" 1, "cv05" 1;
+}
+
+/* Per-word, so kerning and ligatures survive the split */
+.title .word { display: inline-block; }
+.title.isSplit .word {
+  opacity: 0; transform: translateY(0.42em);
+  transition: opacity 900ms var(--ease-out), transform 900ms var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 80ms + 120ms);
+}
+:global(body.is-loaded) .title.isSplit .word { opacity: 1; transform: none; }
+
+.title .wordHl {
+  background-image: linear-gradient(100deg, #e0a878 0%, #ffd9a8 34%, #fff7ea 50%, #ffd9a8 66%, #e0a878 100%);
+  background-size: 240% 100%;
+  background-position: 30% 50%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 8px 28px rgba(255, 190, 120, 0.18));
+  transition: filter 400ms var(--ease-out);
+}
+:global(body.is-loaded) .title .wordHl {
+  animation: wordSheen 1900ms var(--ease-out) 420ms 1 both;
+}
+@keyframes wordSheen {
+  from { background-position: 100% 50%; }
+  to { background-position: 30% 50%; }
+}
+.title:hover .wordHl { filter: drop-shadow(0 8px 34px rgba(255, 196, 128, 0.3)); }
+.wordHl::selection { -webkit-text-fill-color: #fff; background: rgba(217, 164, 91, 0.45); }
+
+.sub {
+  color: var(--muted); font-size: var(--text-lede); line-height: var(--leading-body);
+  max-width: 46ch; text-wrap: pretty; margin-bottom: 2.2rem;
+}
+.sub strong { color: var(--text); font-weight: 500; }
+.actions { display: flex; flex-wrap: wrap; gap: 0.9rem; margin-bottom: 2.4rem; }
+.meta { display: flex; gap: 1.6rem; flex-wrap: wrap; padding-top: 1.4rem; border-top: 1px solid var(--line); }
+.stat b {
+  display: block; font-family: var(--font-huge);
+  font-size: clamp(1.7rem, 1.4rem + 0.8vw, 2.05rem); font-weight: 300; color: #fff;
+  letter-spacing: -0.03em; line-height: 1.1;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.stat span { font-family: var(--font-mono); font-size: 0.65625rem; font-weight: 500; letter-spacing: 0.13em; line-height: 1.55; text-transform: uppercase; color: var(--faint); }
+.statLive b { color: var(--sun); animation: blink 2s infinite; font-size: 1.2rem; }
+
+.scroll {
+  position: absolute; left: 50%; bottom: 1.4rem; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 0.6rem;
+  font-family: var(--font-mono); font-size: 0.65625rem; font-weight: 500; letter-spacing: 0.24em;
+  text-transform: uppercase; color: var(--faint); z-index: 2;
+}
+.scrollLine { width: 1px; height: 42px; position: relative; overflow: hidden; background: linear-gradient(to bottom, var(--line-strong), transparent); }
+.scrollLine::after { content: ""; position: absolute; left: 0; top: -50%; width: 100%; height: 50%; background: var(--sun); animation: scrollPulse 2.4s var(--ease-in-out) infinite; }
+@keyframes scrollPulse { 0% { top: -50%; } 60%, 100% { top: 110%; } }
+
+/* Planets — photographic, softly lit */
+.orbs { position: relative; height: min(58vh, 580px); min-height: 400px; will-change: transform; transition: transform 400ms var(--ease-out); z-index: 1; }
+.halo {
+  position: absolute; inset: 10% 6%; border-radius: 50%;
+  background: radial-gradient(circle, rgba(106,168,255,0.14), rgba(201,107,74,0.1) 45%, transparent 70%);
+  filter: blur(50px); animation: haloBreathe 9s ease-in-out infinite alternate; opacity: 0.8;
+}
+@keyframes haloBreathe { to { transform: scale(1.07); opacity: 1; } }
+.orb {
+  position: absolute; border-radius: 50%; overflow: visible;
+  filter: drop-shadow(0 24px 55px rgba(0,0,0,0.65));
+  animation: orbFloat 8s ease-in-out infinite;
+}
+.orb img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
+  box-shadow: inset -20px -14px 48px rgba(0,0,0,0.62), inset 8px 8px 22px rgba(255,255,255,0.1); }
+.glow { position: absolute; inset: -6%; border-radius: 50%; z-index: -1; filter: blur(26px); opacity: 0.4; }
+.orbEarth .glow { background: rgba(106,168,255,0.55); }
+.orbMars .glow { background: rgba(201,107,74,0.5); }
+.orbMoon .glow { background: rgba(214,220,230,0.35); }
+.ring { position: absolute; border-radius: 50%; border: 1px solid rgba(214,226,240,0.2); pointer-events: none; }
+.r1 { inset: -12px; border-top-color: rgba(255,217,160,0.7); animation: spin 16s linear infinite; }
+.r2 { inset: -24px; border-color: rgba(214,226,240,0.08); animation: spin 26s linear infinite reverse; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.sat { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: #fff; box-shadow: 0 0 8px rgba(255,255,255,0.9); }
+.s1 { top: -12px; left: 50%; animation: orbitX 7s linear infinite; }
+.s2 { top: -8px; left: 50%; animation: orbitX 5.5s linear infinite; }
+@keyframes orbitX { from { transform: rotate(0) translateX(130px) rotate(0); } to { transform: rotate(360deg) translateX(130px) rotate(-360deg); } }
+.label {
+  position: absolute; left: 50%; bottom: -8%; transform: translateX(-50%);
+  font-family: var(--font-mono); font-size: 0.75rem; font-weight: 500; letter-spacing: 0.15em; line-height: 1.4;
+  text-transform: uppercase;
+  color: #fff; text-align: center; text-shadow: 0 1px 10px rgba(0,0,0,0.9); white-space: nowrap; z-index: 3;
+}
+.orbStat { display: block; font-size: 0.6875rem; font-weight: 500; opacity: 0.8; letter-spacing: 0.13em; font-variant-numeric: tabular-nums; color: var(--sun); }
+.orbEarth { width: min(30vw, 310px); aspect-ratio: 1; left: 4%; top: 10%; animation-delay: 0s; }
+.orbMars { width: min(23vw, 220px); aspect-ratio: 1; right: 8%; top: 0; animation-delay: -2.4s; }
+.orbMoon { width: min(17vw, 155px); aspect-ratio: 1; left: 30%; bottom: 2%; animation-delay: -4.6s; }
+@keyframes orbFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+.chip {
+  position: absolute; font-family: var(--font-mono); font-size: var(--text-micro); font-weight: 500;
+  letter-spacing: 0.12em; line-height: 1.4;
+  color: var(--muted); background: rgba(5,8,15,0.82); border: 1px solid var(--line-strong);
+  padding: 0.45rem 0.8rem; border-radius: 4px; backdrop-filter: blur(8px);
+  animation: chipFloat 6s ease-in-out infinite; z-index: 3;
+}
+.chipA { top: 2%; left: 0; }
+.chipB { top: calc(min(23vw, 220px) + 2.7rem); right: 0; animation-delay: -2s; }
+.chipC { bottom: 6%; right: 8%; animation-delay: -4s; }
+@keyframes chipFloat { 50% { transform: translateY(-6px); } }
+
+/* Short desktop viewports: nudge the Moon clear of Earth's gravity label */
+@media (min-width: 901px) and (max-height: 820px) {
+  .orbMoon { left: 40%; bottom: 0; }
+}
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; align-content: center; padding-top: calc(var(--nav-h) + 2rem); }
+  .orbs { height: 330px; min-height: 0; order: -1; }
+  .orbEarth { width: 46vw; max-width: 220px; left: 4%; }
+  .orbMars { width: 34vw; max-width: 160px; right: 6%; top: 0; }
+  .orbMoon { width: 26vw; max-width: 120px; left: 34%; bottom: 0; }
+  .chip { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orb, .scrollLine::after, .bgword span, .halo, .title .wordHl { animation: none !important; }
+  .title.isSplit .word { opacity: 1; transform: none; transition: none; }
+}
+
+@media (forced-colors: active) {
+  .wordHl {
+    background: none;
+    -webkit-text-fill-color: currentColor;
+    color: CanvasText;
+    filter: none;
+    -webkit-text-stroke: 0;
+  }
+}

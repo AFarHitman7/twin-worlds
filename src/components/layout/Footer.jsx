@@ -1,0 +1,19 @@
+import s from "./Footer.module.css";
+
+export default function Footer() {
+  return (
+    <footer className={s.footer}>
+      <div className={s.giant} aria-hidden="true">
+        TWIN&nbsp;WORLDS
+      </div>
+      <div className={s.brand}>TWIN&nbsp;WORLDS ✦ EARTH · MARS · MOON</div>
+      <p className={s.note}>
+        Earth’s Mars and Moon analogues, with the science and the caveats attached.
+      </p>
+      <p className={s.fine}>
+        Built for students, the curious and space enthusiasts · signal ends ·{" "}
+        <a href="#top">back to orbit ↑</a>
+      </p>
+    </footer>
+  );
+}

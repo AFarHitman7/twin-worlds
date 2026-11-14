@@ -1,0 +1,16 @@
+/* ============ CURSOR — reticle ============ */
+.dot, .ring { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 300; border-radius: 50%; }
+.dot { width: 5px; height: 5px; background: var(--sun); box-shadow: 0 0 8px rgba(255,217,160,0.9); transform: translate(-50%,-50%); }
+.ring {
+  width: 34px; height: 34px; border: 1px solid rgba(236, 239, 244, 0.55);
+  transform: translate(-50%,-50%);
+  transition: width 0.25s, height 0.25s, border-color 0.25s, background 0.25s;
+}
+.ring::before, .ring::after {
+  content: ""; position: absolute; background: rgba(236,239,244,0.55);
+}
+.ring::before { left: 50%; top: -6px; bottom: -6px; width: 1px; transform: translateX(-50%); }
+.ring::after { top: 50%; left: -6px; right: -6px; height: 1px; transform: translateY(-50%); }
+.ring.isHover { width: 56px; height: 56px; border-color: var(--sun); background: rgba(255,217,160,0.06); }
+@media (hover: none), (pointer: coarse) { .dot, .ring { display: none; } }
+@media (max-width: 720px) { .dot, .ring { display: none; } }
