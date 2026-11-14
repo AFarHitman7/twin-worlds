@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { NAV_LINKS, PAGES } from "../../data/nav.js";
 import { useScrollThreshold } from "../../hooks/useScroll.js";
 import { useScrollSpy } from "../../hooks/useScrollSpy.js";
 import { cx } from "../../lib/cx.js";
+import { scrollToTop } from "../../router/useRoute.js";
 import Button from "../ui/Button.jsx";
 import s from "./Nav.module.css";
 
@@ -26,7 +27,15 @@ export default function Nav({ route = "/" }) {
 
   const close = () => setOpen(false);
 
-  // Desktop shows the links for the current page; the mobile menu lists every page.
+  // Clicking the page you are already on is a request for its top.
+  const follow = (path) => () => {
+    close();
+    if (path === route) scrollToTop();
+  };
+
+  // Desktop shows the pages around the current one, with the current page as a
+  // label; the menu lists every page. On the landing page only Atlas rides in
+  // the bar, since the CTA already covers the game.
   const pageLinks = PAGES.map((page) => {
     const current = page.path === route;
     const mobileOnly = onLanding ? page.path !== "/atlas" : current;
@@ -55,15 +64,21 @@ export default function Nav({ route = "/" }) {
 
       <nav className={s.links} id="navLinks" aria-label="Primary">
         {pageLinks.map((page) => (
-          <a
-            key={page.path}
-            href={`#${page.path}`}
-            className={cx(page.mobileOnly && s.mobileOnly)}
-            aria-current={page.current ? "page" : undefined}
-            onClick={close}
-          >
-            {page.label}
-          </a>
+          <Fragment key={page.path}>
+            {page.current && !onLanding ? (
+              <span className={cx(s.currentLabel, s.desktopOnly)} aria-current="page">
+                {page.label}
+              </span>
+            ) : null}
+            <a
+              href={`#${page.path}`}
+              className={cx(page.mobileOnly && s.mobileOnly)}
+              aria-current={page.current ? "page" : undefined}
+              onClick={follow(page.path)}
+            >
+              {page.label}
+            </a>
+          </Fragment>
         ))}
 
         {onLanding
@@ -71,7 +86,11 @@ export default function Nav({ route = "/" }) {
               <a
                 key={link.id}
                 href={`#${link.id}`}
-                className={active === link.id ? s.isActive : undefined}
+                className={cx(
+                  active === link.id && s.isActive,
+                  // The menu already has a Game page link above.
+                  link.id === "game" && s.desktopOnly
+                )}
                 onClick={close}
               >
                 <em>{link.num}</em>

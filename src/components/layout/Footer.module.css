@@ -18,19 +18,20 @@
 .brand { font-family: var(--font-display); font-weight: 500; font-size: 0.8125rem; letter-spacing: 0.22em; color: var(--text); margin-bottom: 0.8rem; text-wrap: balance; }
 .note { max-width: 60ch; margin: 0 auto 0.4rem; line-height: 1.65; }
 .pages {
-  display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4rem 1.4rem;
-  margin: 1.4rem 0 1.1rem;
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 0 0.4rem;
+  margin: 1rem 0 0.8rem;
   font-family: var(--font-mono); font-size: 0.6875rem; font-weight: 500;
   letter-spacing: 0.16em; text-transform: uppercase;
 }
 .pages a {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 40px; padding: 0 0.6rem;
   color: var(--muted);
-  padding: 0.15rem 0;
   border-bottom: 1px solid transparent;
   transition: color 200ms, border-color 200ms;
 }
-.pages a:hover { color: #fff; border-bottom-color: var(--sun); }
-.pages a[aria-current="page"] { color: var(--sun); border-bottom-color: rgba(217, 164, 91, 0.5); }
+.pages a:hover { color: var(--text); border-bottom-color: currentColor; }
+.pages a[aria-current="page"] { color: var(--sun); border-bottom-color: currentColor; }
 .fine { font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: 0.07em; line-height: 1.9; }
 .fine a {
   color: var(--sun);

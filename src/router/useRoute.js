@@ -26,7 +26,9 @@ export function useRoute() {
   useEffect(() => {
     const onHashChange = () => {
       // In-page anchors (#worlds, #game) are not routes: leave the page as is.
-      if (!window.location.hash.startsWith("#/")) return;
+      // An empty hash is not an anchor either — it restores the landing page.
+      const hash = window.location.hash;
+      if (hash && !hash.startsWith("#/")) return;
       setCurrent(readRoute());
     };
 
@@ -42,20 +44,37 @@ export function navigate(path) {
   window.location.hash = path.startsWith("/") ? `#${path}` : `#/${path}`;
 }
 
+export function scrollToTop() {
+  if (typeof window === "undefined") return;
+  try {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  } catch {
+    window.scrollTo(0, 0);
+  }
+}
+
+/** True when the hash points at a section on the page rather than a route. */
+function isSectionHash(hash) {
+  if (!hash || hash.startsWith("#/") || hash === "#top") return false;
+  return Boolean(document.getElementById(hash.slice(1)));
+}
+
 export function useScrollToTop(route) {
   useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const hash = window.location.hash;
     // A deep link to a section (e.g. #worlds) keeps the browser's own jump.
-    if (hash && !hash.startsWith("#/") && hash !== "#top") {
-      if (document.getElementById(hash.slice(1))) return;
-    }
-
-    try {
-      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-    } catch {
-      window.scrollTo(0, 0);
-    }
+    if (isSectionHash(window.location.hash)) return;
+    scrollToTop();
   }, [route]);
+
+  useEffect(() => {
+    const onHashChange = () => {
+      // "Home" (#/) clicked while already home: the route does not change, but
+      // the page must still return to the top. Other hashes are anchors or
+      // routes, handled by the browser or by the effect above.
+      if (window.location.hash === "#/") scrollToTop();
+    };
+
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
 }

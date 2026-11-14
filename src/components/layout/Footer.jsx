@@ -1,4 +1,5 @@
 import { PAGES } from "../../data/nav.js";
+import { scrollToTop } from "../../router/useRoute.js";
 import s from "./Footer.module.css";
 
 export default function Footer({ route = "/" }) {
@@ -19,6 +20,7 @@ export default function Footer({ route = "/" }) {
             key={page.path}
             href={`#${page.path}`}
             aria-current={page.path === route ? "page" : undefined}
+            onClick={page.path === route ? scrollToTop : undefined}
           >
             {page.label}
           </a>

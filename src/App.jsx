@@ -1,4 +1,4 @@
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react";
 import Cursor from "./components/chrome/Cursor.jsx";
 import Loader from "./components/chrome/Loader.jsx";
 import ScrollProgress from "./components/chrome/ScrollProgress.jsx";
@@ -8,10 +8,11 @@ import Starfield from "./components/chrome/Starfield.jsx";
 import ToTop from "./components/chrome/ToTop.jsx";
 import Footer from "./components/layout/Footer.jsx";
 import Nav from "./components/layout/Nav.jsx";
-import AtlasPage from "./pages/AtlasPage.jsx";
-import GamePage from "./pages/GamePage.jsx";
 import LandingPage from "./pages/LandingPage.jsx";
 import { useRoute, useScrollToTop } from "./router/useRoute.js";
+
+const AtlasPage = lazy(() => import("./pages/AtlasPage.jsx"));
+const GamePage = lazy(() => import("./pages/GamePage.jsx"));
 
 export default function App() {
   const { route } = useRoute();
@@ -38,7 +39,7 @@ export default function App() {
       <SpaceBackdrop />
       <Nav route={route} />
 
-      <Suspense fallback={<main id="main" aria-busy="true" />}>
+      <Suspense fallback={<main id="main" aria-busy="true" style={{ minHeight: "60vh" }} />}>
         {route === "/atlas" ? <AtlasPage /> : route === "/game" ? <GamePage /> : <LandingPage />}
       </Suspense>
 
