@@ -1,0 +1,254 @@
+/* ============================================================
+   RECON IMAGE — a photograph normalised to a 480x270 grey frame.
+   The canvas paints the crop; CSS owns the grey and the chrome.
+   ============================================================ */
+
+.frame {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: var(--panel-2);
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.55),
+    inset 0 0 60px rgba(0, 0, 0, 0.6);
+}
+
+.frame[data-live="true"] {
+  animation: frameIn 0.55s var(--ease-spring);
+}
+
+.media {
+  position: absolute;
+  inset: 0;
+}
+
+.canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  filter: grayscale(1) contrast(1.08) brightness(0.96);
+}
+
+/* ------------------------------------------------------------- chrome */
+
+.corner {
+  position: absolute;
+  z-index: 2;
+  width: 0.8rem;
+  height: 0.8rem;
+  border: 0 solid var(--text);
+  opacity: 0.42;
+  pointer-events: none;
+}
+
+.tl {
+  top: 0.6rem;
+  left: 0.6rem;
+  border-top-width: 1px;
+  border-left-width: 1px;
+}
+
+.tr {
+  top: 0.6rem;
+  right: 0.6rem;
+  border-top-width: 1px;
+  border-right-width: 1px;
+}
+
+.bl {
+  bottom: 0.6rem;
+  left: 0.6rem;
+  border-bottom-width: 1px;
+  border-left-width: 1px;
+}
+
+.br {
+  bottom: 0.6rem;
+  right: 0.6rem;
+  border-bottom-width: 1px;
+  border-right-width: 1px;
+}
+
+.chrome {
+  position: absolute;
+  z-index: 2;
+  padding: 0.3rem 0.45rem;
+  border-radius: 2px;
+  background: rgba(3, 5, 9, 0.58);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  color: var(--muted);
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.chrome[data-corner="tl"] {
+  top: 0.55rem;
+  left: 1.55rem;
+}
+
+.chrome[data-corner="tr"] {
+  top: 0.55rem;
+  right: 1.55rem;
+}
+
+.rec {
+  position: absolute;
+  z-index: 2;
+  right: 1.55rem;
+  bottom: 0.55rem;
+  padding: 0.3rem 0.45rem;
+  border-radius: 2px;
+  background: rgba(3, 5, 9, 0.58);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  line-height: 1;
+  color: var(--muted);
+  text-transform: uppercase;
+  animation: recBlink 2.6s steps(1, end) infinite;
+  pointer-events: none;
+}
+
+.scan {
+  position: absolute;
+  z-index: 1;
+  top: -30%;
+  left: 0;
+  right: 0;
+  height: 28%;
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.075), transparent);
+  animation: sweep 4.8s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes frameIn {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes sweep {
+  to {
+    top: 110%;
+  }
+}
+
+@keyframes recBlink {
+  50% {
+    opacity: 0.4;
+  }
+}
+
+/* ------------------------------------------------------- loading / error */
+
+.acquiring {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: var(--panel-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  line-height: 1.6;
+  color: var(--faint);
+  text-align: center;
+  text-transform: uppercase;
+  animation: acquirePulse 2.2s ease-in-out infinite;
+}
+
+.lost {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  padding: 1rem;
+  background: var(--panel-2);
+  text-align: center;
+}
+
+.lostTitle {
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  line-height: 1.6;
+  color: var(--text);
+  text-transform: uppercase;
+}
+
+.retry {
+  min-height: 40px;
+  padding: 0 1.15rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  transition: border-color 180ms, background 180ms;
+}
+
+.retry:hover {
+  border-color: var(--text);
+  background: rgba(236, 239, 244, 0.05);
+}
+
+@keyframes acquirePulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/* ---------------------------------------------------------- thumbnail */
+
+.isCompact {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  animation: none;
+}
+
+/* The labels share a 280px frame at the narrow end, so they step down. */
+@media (max-width: 560px) {
+  .chrome,
+  .rec {
+    font-size: 0.625rem;
+    letter-spacing: 0.12em;
+    padding: 0.28rem 0.4rem;
+  }
+}
+
+/* ------------------------------------------------------ reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .frame[data-live="true"],
+  .acquiring,
+  .rec {
+    animation: none;
+  }
+
+  .scan {
+    display: none;
+  }
+}
