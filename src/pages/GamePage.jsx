@@ -6,13 +6,13 @@ import { CHOICES, ROUNDS, verdict } from "../data/game.js";
 import { useReducedMotion } from "../hooks/useMediaQuery.js";
 import { cx } from "../lib/cx.js";
 import { confettiBurst } from "../lib/fx.js";
+import { pad2 } from "../lib/format.js";
 import s from "./GamePage.module.css";
 import page from "./Page.module.css";
 
 const TOTAL = ROUNDS.length;
 const BEST_KEY = "tw:best";
 const WORLD = { earth: "Earth", mars: "Mars", moon: "Moon" };
-const pad = (value) => String(value).padStart(2, "0");
 
 function readBest() {
   try {
@@ -36,6 +36,7 @@ export default function GamePage() {
   const [newBest, setNewBest] = useState(false);
   const reduced = useReducedMotion();
   const bodyRef = useRef(null);
+  const resultsRef = useRef(null);
 
   const round = ROUNDS[index];
   const [verdictTitle, verdictLine] = verdict(score, TOTAL);
@@ -49,6 +50,13 @@ export default function GamePage() {
       block: "start",
     });
   }, [phase, reduced]);
+
+  // The replay control unmounts with the board, so focus would fall to the
+  // body. The verdict heading takes it instead and announces the result.
+  useEffect(() => {
+    if (phase !== "end") return;
+    resultsRef.current?.focus({ preventScroll: true });
+  }, [phase]);
 
   const start = useCallback(() => {
     // Preload every frame so the reveal never waits on the network.
@@ -148,7 +156,7 @@ export default function GamePage() {
           <h1 className="section__title" id="game-title">
             Signal test
           </h1>
-          <p className={s.lede}>
+          <p className="section__lede">
             Colour and resolution have been stripped from twelve frames. Name the world from
             the terrain alone.
           </p>
@@ -161,7 +169,7 @@ export default function GamePage() {
         </div>
       </section>
 
-      <section ref={bodyRef} className={s.body} aria-label="The signal test">
+      <section ref={bodyRef} className={s.body}>
         {phase === "intro" ? (
           <Reveal className={s.briefing}>
             <div className={s.briefTop}>
@@ -173,7 +181,7 @@ export default function GamePage() {
               ) : null}
             </div>
 
-            <ol className={s.rules}>
+            <ol className={s.rules} role="list">
               <li className={s.rule}>
                 <span className={s.ruleNum}>01</span>
                 <p className={s.ruleTitle}>Twelve frames</p>
@@ -208,7 +216,7 @@ export default function GamePage() {
           <div className={s.play}>
             <div className={s.hud}>
               <span className={s.hudRound}>
-                Round {pad(index + 1)} / {TOTAL}
+                Round {pad2(index + 1)} / {TOTAL}
               </span>
               <div className={s.meter} aria-hidden="true">
                 {ROUNDS.map((item, slot) => (
@@ -228,8 +236,9 @@ export default function GamePage() {
             <ReconImage
               key={index}
               src={round.src}
-              alt={round.alt}
+              alt={answered ? round.altRevealed : round.alt}
               frame={index + 1}
+              total={TOTAL}
               className={s.stage}
             />
 
@@ -270,7 +279,9 @@ export default function GamePage() {
         {phase === "end" ? (
           <div className={s.results}>
             <div className={s.resultsHead}>
-              <h2 className={s.verdictTitle}>{verdictTitle}</h2>
+              <h2 ref={resultsRef} className="section__title" tabIndex={-1}>
+                {verdictTitle}
+              </h2>
               <p className={s.finalScore} aria-live="polite">
                 <span>{score}</span>
                 <span className={s.scoreOf}> / {TOTAL}</span>
@@ -287,7 +298,7 @@ export default function GamePage() {
               </Button>
             </div>
 
-            <ol className={s.review}>
+            <ol className={s.review} role="list">
               {ROUNDS.map((item, slot) => {
                 const ok = picks[slot] === item.answer;
                 return (
@@ -302,11 +313,11 @@ export default function GamePage() {
                         />
                         <span className={s.cellMark}>
                           <span aria-hidden="true">{ok ? "✓" : "✗"}</span>
-                          <span className={s.srOnly}>{ok ? "Correct" : "Missed"}</span>
+                          <span className="visually-hidden">{ok ? "Correct" : "Missed"}</span>
                         </span>
                       </div>
                       <figcaption className={s.cellCap}>
-                        <span className={s.cellNum}>Frame {pad(slot + 1)}</span>
+                        <span className={s.cellNum}>Frame {pad2(slot + 1)}</span>
                         <span className={s.cellWorld}>{WORLD[item.answer]}</span>
                         <span className={s.cellSite}>{item.site}</span>
                       </figcaption>

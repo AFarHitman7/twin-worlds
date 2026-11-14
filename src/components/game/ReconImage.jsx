@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { cx } from "../../lib/cx.js";
+import { pad2 } from "../../lib/format.js";
 import s from "./ReconImage.module.css";
 
 // A frame is drawn once into a 480x270 canvas and then shown larger. The
@@ -14,6 +15,7 @@ export default function ReconImage({
   width = 480,
   height = 270,
   frame,
+  total,
   compact = false,
   className,
 }) {
@@ -90,13 +92,14 @@ export default function ReconImage({
   const label =
     status === "error"
       ? "Frame failed to load"
-      : alt || `Reconnaissance frame ${frame ?? 1} of 12`;
+      : alt || `Reconnaissance frame ${frame ?? 1}${total ? ` of ${total}` : ""}`;
 
   return (
     <div
       className={cx(s.frame, compact && s.isCompact, className)}
       data-state={status}
       data-live={compact ? undefined : "true"}
+      style={{ aspectRatio: `${width} / ${height}` }}
     >
       <div className={s.media} role="img" aria-label={label}>
         <canvas
@@ -116,7 +119,7 @@ export default function ReconImage({
           <span className={cx(s.corner, s.br)} aria-hidden="true" />
 
           <span className={s.chrome} data-corner="tl" aria-hidden="true">
-            {frame ? `Frame ${String(frame).padStart(2, "0")}` : "Frame"}
+            {frame ? `Frame ${pad2(frame)}` : "Frame"}
           </span>
           <span className={s.chrome} data-corner="tr" aria-hidden="true">
             {width}×{height} · 8-bit grey
@@ -128,7 +131,7 @@ export default function ReconImage({
         </>
       )}
 
-      {status === "loading" ? (
+      {status === "loading" && !compact ? (
         <span className={s.acquiring} aria-hidden="true">
           Acquiring frame
         </span>

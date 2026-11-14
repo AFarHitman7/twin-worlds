@@ -192,7 +192,7 @@ export default function AtlasPage() {
   return (
     <main id="main" className={s.page}>
       <p
-        className={atlas.srOnly}
+        className="visually-hidden"
         role="status"
         aria-live="polite"
         aria-atomic="true"
@@ -303,7 +303,7 @@ export default function AtlasPage() {
           aria-label={`All sites ranked by ${BODY_NAME[rankBody]} match`}
         >
           <table className={atlas.table}>
-            <caption className={atlas.srOnly}>
+            <caption className="visually-hidden">
               All {SITES.length} analogue sites, ranked by {BODY_NAME[rankBody]} similarity.
             </caption>
             <thead>
@@ -377,7 +377,7 @@ export default function AtlasPage() {
 
         <div className={atlas.refWrap}>
           <table className={atlas.refTable}>
-            <caption className={atlas.srOnly}>
+            <caption className="visually-hidden">
               Mars and Moon reference values for the {PARAMS.length} parameters and gravity.
             </caption>
             <thead>

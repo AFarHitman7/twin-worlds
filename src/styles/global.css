@@ -206,6 +206,19 @@ button { font-family: inherit; cursor: pointer; color: inherit; }
 }
 .mono { font-family: var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase; }
 
+/* Kept for screen readers only: captions, announcers and badge words. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* Display cut: real Inter Tight weights, open digits, tailed l */
 .section__title, .ghost {
   font-optical-sizing: auto;

@@ -25,7 +25,7 @@ export function useRoute() {
 
   useEffect(() => {
     const onHashChange = () => {
-      // In-page anchors (#worlds, #game) are not routes: leave the page as is.
+      // In-page anchors (#worlds) are not routes: leave the page as is.
       // An empty hash is not an anchor either — it restores the landing page.
       const hash = window.location.hash;
       if (hash && !hash.startsWith("#/")) return;

@@ -98,7 +98,7 @@ export default function Hero() {
           <Button href="#worlds" magnetic>
             Explore the worlds ↓
           </Button>
-          <Button href="#game" variant="brass" magnetic>
+          <Button href="#/game" variant="brass" magnetic>
             Guess the planet ✦
           </Button>
         </div>

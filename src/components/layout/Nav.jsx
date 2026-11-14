@@ -85,7 +85,8 @@ export default function Nav({ route = "/" }) {
           ? NAV_LINKS.map((link) => (
               <a
                 key={link.id}
-                href={`#${link.id}`}
+                // The game is a page now, not a section on the landing page.
+                href={link.id === "game" ? "#/game" : `#${link.id}`}
                 className={cx(
                   active === link.id && s.isActive,
                   // The menu already has a Game page link above.
