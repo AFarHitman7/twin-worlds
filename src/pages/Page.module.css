@@ -6,13 +6,3 @@
 .head {
   padding-bottom: clamp(1rem, 3vw, 2rem);
 }
-
-.note {
-  margin-top: 1.5rem;
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--faint);
-}

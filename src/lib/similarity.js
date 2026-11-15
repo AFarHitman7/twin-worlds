@@ -45,9 +45,9 @@ export const PARAMS = [
   },
   {
     key: "ops",
-    label: "Operational fidelity",
-    marsRef: "3-22 min light delay",
-    moonRef: "1.3 s light delay",
+    label: "Operational value",
+    marsRef: "Crewed analogues, 3-22 min delay, no resupply",
+    moonRef: "Apollo surface training, 1.3 s delay",
     weight: 0.08,
   },
 ];

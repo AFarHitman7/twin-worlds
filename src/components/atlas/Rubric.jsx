@@ -9,6 +9,7 @@ import { RUBRIC_PARTS } from "./rubric.js";
 export default function Rubric({ className }) {
   return (
     <p className={className}>
+      <span>SCALE</span>{" "}
       {RUBRIC_PARTS.map((part, index) => (
         <Fragment key={part}>
           {index > 0 ? " " : null}

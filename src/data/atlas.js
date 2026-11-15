@@ -1054,7 +1054,7 @@ export const SITES = [
       ops: {
         value: "Remote, no crewed work",
         moon: 20,
-        mars: 55,
+        mars: 30,
         note: "Hostile and remote, with no crewed analogue work.",
       },
     },

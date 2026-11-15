@@ -185,6 +185,12 @@ export default function SiteDossier({ site, dialog = false, open = false, onClos
               <Rubric className={s.rubric} />
               <p>
                 Each score is a weighted mean of {PARAMS.length} parameters: {PARAM_LIST}.
+                They are measurements on that scale, not grades: a low score is a true
+                reading, not a fail.
+              </p>
+              <p>
+                Operational value asks how well the site rehearses operations for that
+                body, not how equal the numbers are.
               </p>
             </div>
           </details>

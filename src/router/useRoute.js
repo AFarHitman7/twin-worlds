@@ -27,8 +27,11 @@ export function useRoute() {
     const onHashChange = () => {
       const hash = window.location.hash;
       if (hash && !hash.startsWith("#/")) {
-        // A section anchor on the landing page leaves that page as it is; from
-        // another route it is a way back home, scrolled to that section.
+        // A section anchor belongs to whichever page owns that element: #sites
+        // is the atlas's own, #worlds is the landing's. A hash this document
+        // can resolve keeps the current route and lets the browser scroll; one
+        // it cannot is a way back home, scrolled after that page renders.
+        if (document.getElementById(hash.slice(1))) return;
         setCurrent((previous) => (previous.route === "/" ? previous : HOME));
         return;
       }
@@ -69,11 +72,6 @@ export function useRoute() {
   }, [current]);
 
   return current;
-}
-
-export function navigate(path) {
-  if (typeof window === "undefined") return;
-  window.location.hash = path.startsWith("/") ? `#${path}` : `#/${path}`;
 }
 
 /** Replace the current history entry instead of adding one. */

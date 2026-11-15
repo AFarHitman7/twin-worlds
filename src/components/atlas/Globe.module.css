@@ -96,10 +96,12 @@
   left: 0;
   display: grid;
   place-items: center;
-  width: 26px;
-  height: 26px;
-  min-width: 26px;
-  min-height: 26px;
+  /* A 36 px map marker: large enough to tap, small enough that the 18 pins do
+     not cover each other at this density (see PIN_SPACING in Globe.jsx). */
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
   padding: 0;
   border: 0;
   border-radius: 50%;
@@ -167,10 +169,12 @@
   100% { transform: scale(2.1); opacity: 0; }
 }
 
-/* Name chip, always kept inside the stage by the flip attributes. */
+/* Name chip, always kept inside the stage by the flip attributes. The offset
+   is measured from the 36 px target's centre, so the gap to the 9 px dot is
+   the same as it was on the smaller marker. */
 .chip {
   position: absolute;
-  top: calc(100% + 7px);
+  top: calc(50% + 20px);
   left: 50%;
   z-index: 1;
   max-width: min(46vw, 12rem);
@@ -194,7 +198,7 @@
 }
 .pin[data-flip-x="start"] .chip { left: 0; transform: none; }
 .pin[data-flip-x="end"] .chip { right: 0; left: auto; transform: none; }
-.pin[data-flip-y="up"] .chip { top: auto; bottom: calc(100% + 7px); }
+.pin[data-flip-y="up"] .chip { top: auto; bottom: calc(50% + 20px); }
 
 /* --------------------------------------------------------------- zoom */
 

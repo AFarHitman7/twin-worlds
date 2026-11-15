@@ -1,5 +1,6 @@
 import { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react";
 import Cursor from "./components/chrome/Cursor.jsx";
+import ErrorBoundary from "./components/chrome/ErrorBoundary.jsx";
 import Loader from "./components/chrome/Loader.jsx";
 import ScrollProgress from "./components/chrome/ScrollProgress.jsx";
 import SpaceBackdrop from "./components/chrome/SpaceBackdrop.jsx";
@@ -40,7 +41,18 @@ export default function App() {
       <Nav route={route} />
 
       <Suspense fallback={<main id="main" aria-busy="true" style={{ minHeight: "60vh" }} />}>
-        {route === "/atlas" ? <AtlasPage /> : route === "/game" ? <GamePage /> : <LandingPage />}
+        {/* Keyed by route so a failure belongs to the page that threw; the
+            next navigation remounts a clean boundary, and the nav and footer
+            outside it stay mounted throughout. */}
+        <ErrorBoundary key={route}>
+          {route === "/atlas" ? (
+            <AtlasPage />
+          ) : route === "/game" ? (
+            <GamePage />
+          ) : (
+            <LandingPage />
+          )}
+        </ErrorBoundary>
       </Suspense>
 
       <Footer route={route} />

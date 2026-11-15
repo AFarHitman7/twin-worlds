@@ -21,11 +21,15 @@ const SPIN_STEP = 0.0012;
 const VELOCITY_DECAY = 0.94;
 const VELOCITY_STOP = 0.0004;
 const FACING_MIN = 0.06;
-const PIN_SPACING = 22;
+// A pin is a 36 px touch target on a map, below the 40 px control minimum by
+// ruling: at 40 px the Arizona pair could not both stay hittable at this
+// density. Spacing matches the target, so two hit boxes never overlap.
+const PIN_SIZE = 36;
+const PIN_SPACING = 40;
 const FOCUS_MS = 650;
 const ZOOM_STEP = 0.2;
-// A pin is 26 px across; the dock keep-out adds a small visual gap.
-const PIN_HALF = 13;
+// The dock keep-out adds a small visual gap to the pin's half-width.
+const PIN_HALF = PIN_SIZE / 2;
 const DOCK_CLEARANCE = 6;
 
 // The opening view: the Atlantic, with Africa turning toward the camera and
@@ -81,12 +85,57 @@ function targetLabel(targets = []) {
   return kind === "moon" ? "Moon analogue" : "Mars analogue";
 }
 
+/**
+ * Builds the renderer and the starting scene in one transaction. Keeping it
+ * apart means a driver that passes the context probe but throws on the real
+ * renderer leaves no canvas and no listener behind: the caller catches, removes
+ * the canvas and reports the failure.
+ */
+function buildScene(canvas) {
+  const renderer = new THREE.WebGLRenderer({
+    canvas,
+    antialias: true,
+    alpha: true,
+    powerPreference: "high-performance",
+  });
+  renderer.setClearAlpha(0);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 100);
+  camera.position.set(0, 0, CAMERA_Z);
+
+  const globeGroup = new THREE.Group();
+  globeGroup.rotation.order = "YXZ";
+  globeGroup.quaternion.setFromEuler(
+    new THREE.Euler(START_PITCH, START_YAW, 0, "YXZ")
+  );
+  scene.add(globeGroup);
+
+  const geometry = new THREE.SphereGeometry(1, 96, 64);
+  const material = new THREE.MeshStandardMaterial({
+    roughness: 0.92,
+    metalness: 0.02,
+  });
+  const globe = new THREE.Mesh(geometry, material);
+  globeGroup.add(globe);
+
+  const sun = new THREE.DirectionalLight(0xffffff, 2.1);
+  sun.position.set(-2.4, 1.6, 2.2);
+  scene.add(sun);
+  scene.add(new THREE.AmbientLight(0x2a3444, 0.55));
+
+  return { renderer, scene, camera, globeGroup, geometry, material };
+}
+
 export default function Globe({
   sites = [],
   selected = null,
   onSelect,
   filter = "all",
   onShowList,
+  onStatus,
 }) {
   const stageRef = useRef(null);
   const hostRef = useRef(null);
@@ -119,6 +168,12 @@ export default function Globe({
     api?.settle();
     return undefined;
   }, [reduced]);
+
+  // The page hides the "tap a pin" hint when the globe cannot show pins; the
+  // status is reported once per change and never read back.
+  useEffect(() => {
+    onStatus?.(status);
+  }, [status, onStatus]);
 
   // A selection from outside turns the chosen site to face the camera.
   useEffect(() => {
@@ -213,41 +268,18 @@ export default function Globe({
       };
     };
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 100);
-    camera.position.set(0, 0, CAMERA_Z);
-
-    const renderer = new THREE.WebGLRenderer({
-      canvas,
-      antialias: true,
-      alpha: true,
-      powerPreference: "high-performance",
-    });
-    renderer.setClearAlpha(0);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-
-    // --- planet -----------------------------------------------------------
-    const globeGroup = new THREE.Group();
-    globeGroup.rotation.order = "YXZ";
-    globeGroup.quaternion.setFromEuler(
-      new THREE.Euler(START_PITCH, START_YAW, 0, "YXZ")
-    );
-    scene.add(globeGroup);
-
-    const geometry = new THREE.SphereGeometry(1, 96, 64);
-    const material = new THREE.MeshStandardMaterial({
-      roughness: 0.92,
-      metalness: 0.02,
-    });
-    const globe = new THREE.Mesh(geometry, material);
-    globeGroup.add(globe);
-
-    const sun = new THREE.DirectionalLight(0xffffff, 2.1);
-    sun.position.set(-2.4, 1.6, 2.2);
-    scene.add(sun);
-    scene.add(new THREE.AmbientLight(0x2a3444, 0.55));
-
+    let stageParts;
+    try {
+      stageParts = buildScene(canvas);
+    } catch {
+      // A renderer that throws must not take the page down with it: drop the
+      // canvas so nothing empty is left in the stage, and let the error state
+      // offer the ranked list instead. No listener has been attached yet.
+      canvas.remove();
+      setStatus("error");
+      return undefined;
+    }
+    const { renderer, scene, camera, globeGroup, geometry, material } = stageParts;
     // --- pins -------------------------------------------------------------
     const vectors = new Map();
     const vectorFor = (site) => {
@@ -320,7 +352,12 @@ export default function Globe({
         const x = (screen.x * 0.5 + 0.5) * width;
         const y = (-screen.y * 0.5 + 0.5) * height;
 
-        if (x < -16 || x > width + 16 || y < -16 || y > height + 16) {
+        if (
+          x < -PIN_HALF ||
+          x > width + PIN_HALF ||
+          y < -PIN_HALF ||
+          y > height + PIN_HALF
+        ) {
           hidePin(pin);
           continue;
         }
@@ -331,9 +368,11 @@ export default function Globe({
 
       // Cinder Lake and Meteor Crater are ~40 km apart, which is one pixel at
       // this scale: one pin would make the other unclickable. Nudge pairs that
-      // land within a fingertip of each other along the line between them. A
-      // ten-pixel shift is invisible on the globe and keeps both hittable.
-      for (let pass = 0; pass < 3; pass += 1) {
+      // land within one touch target of each other along the line between them,
+      // so neither hit box covers the other; the shift is invisible on the
+      // globe. Clusters need a few passes to settle, each pair moving half the
+      // remaining gap at a time.
+      for (let pass = 0; pass < 8; pass += 1) {
         for (let i = 0; i < visible.length; i += 1) {
           for (let j = i + 1; j < visible.length; j += 1) {
             const a = visible[i];
@@ -358,27 +397,67 @@ export default function Globe({
         }
       }
 
-      for (const entry of visible) {
-        const { pin, site, z } = entry;
-        let x = clamp(entry.x, 8, width - 8);
-        let y = clamp(entry.y, 8, height - 8);
+      const edgeX = Math.min(PIN_HALF, width / 2);
+      const edgeY = Math.min(PIN_HALF, height / 2);
 
-        // The zoom dock owns the bottom-right corner. This runs after the
-        // declutter pass, so a pin the pass shifted left cannot land back
-        // inside the dock; the shifted pin's chip flips up, away from it.
-        if (dockBox) {
-          const reach = PIN_HALF + DOCK_CLEARANCE;
+      for (const entry of visible) {
+        // The whole 36 px hit box stays inside the stage: a target hanging over
+        // the edge would be clipped and only partly tappable.
+        entry.x = clamp(entry.x, edgeX, width - edgeX);
+        entry.y = clamp(entry.y, edgeY, height - edgeY);
+        entry.docked = false;
+      }
+
+      // The zoom dock owns the bottom-right corner. A pin it covers moves left
+      // of it, or above it when the corner is too narrow; the shifted pin's
+      // chip flips up, away from it.
+      if (dockBox) {
+        const reach = PIN_HALF + DOCK_CLEARANCE;
+        for (const entry of visible) {
           const inside =
-            x + reach > dockBox.left &&
-            x - reach < dockBox.right &&
-            y + reach > dockBox.top &&
-            y - reach < dockBox.bottom;
-          if (inside) {
-            const clear = dockBox.left - reach;
-            if (clear >= 8) x = clear;
-            else y = Math.max(8, dockBox.top - reach);
+            entry.x + reach > dockBox.left &&
+            entry.x - reach < dockBox.right &&
+            entry.y + reach > dockBox.top &&
+            entry.y - reach < dockBox.bottom;
+          if (!inside) continue;
+          const clear = dockBox.left - reach;
+          if (clear >= edgeX) entry.x = clear;
+          else entry.y = Math.max(edgeY, dockBox.top - reach);
+          entry.docked = true;
+        }
+      }
+
+      // A pin moved clear of the dock can land inside another pin's target.
+      // Those neighbours give way, never the docked pin, so the corner stays
+      // clear and the 40 px spacing is restored in the same pass.
+      for (const dockedPin of visible) {
+        if (!dockedPin.docked) continue;
+        for (const other of visible) {
+          if (other === dockedPin) continue;
+          const dx = other.x - dockedPin.x;
+          const dy = other.y - dockedPin.y;
+          const distance = Math.hypot(dx, dy);
+          if (distance >= PIN_SPACING) continue;
+          const ux = distance < 0.01 ? 0 : dx / distance;
+          const uy = distance < 0.01 ? 1 : dy / distance;
+          const gap = PIN_SPACING - Math.max(distance, 0.01);
+
+          if (other.docked) {
+            // Two pins in the same corner separate vertically; the dock keeps
+            // them both to its left, so a horizontal shove could re-enter it.
+            other.y = clamp(other.y + uy * gap * 0.5, edgeY, height - edgeY);
+            dockedPin.y = clamp(dockedPin.y - uy * gap * 0.5, edgeY, height - edgeY);
+          } else {
+            other.x = clamp(other.x + ux * gap, edgeX, width - edgeX);
+            other.y = clamp(other.y + uy * gap, edgeY, height - edgeY);
           }
         }
+      }
+
+      for (const entry of visible) {
+        const { pin, site, z } = entry;
+        const x = entry.x;
+        const y = entry.y;
 
         pin.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0) translate(-50%, -50%)`;
 
@@ -595,6 +674,15 @@ export default function Globe({
     };
 
     const onPointerDown = (event) => {
+      // The zoom dock sits inside the stage, and its buttons are controls, not
+      // a grab surface. React's synthetic stopPropagation cannot keep the
+      // native listener from firing, so the gesture is cancelled here.
+      if (
+        event.target instanceof Element &&
+        event.target.closest("[data-zoom-dock]")
+      ) {
+        return;
+      }
       if (event.pointerType === "mouse" && event.button !== 0) return;
       if (pointers.size >= 2) return;
 
@@ -718,15 +806,19 @@ export default function Globe({
     };
 
     const onWheel = (event) => {
-      event.preventDefault();
-      interacted = true;
       const unit =
         event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? 100 : 1;
-      zoomTarget = clamp(
+      const next = clamp(
         zoomTarget + event.deltaY * unit * 0.0012,
         ZOOM_MIN,
         ZOOM_MAX
       );
+      // At an end of the range the wheel changes nothing, so the page keeps its
+      // scroll instead of being trapped at the clamp.
+      if (next === zoomTarget) return;
+      event.preventDefault();
+      interacted = true;
+      zoomTarget = next;
       syncZoomLimits();
     };
 
@@ -841,7 +933,6 @@ export default function Globe({
             data-zoom-dock="true"
             role="group"
             aria-label="Zoom"
-            onPointerDown={(event) => event.stopPropagation()}
           >
             <button
               type="button"
@@ -910,7 +1001,7 @@ export default function Globe({
 
         {status === "error" ? (
           <div className={s.failed}>
-            <p>Globe unavailable on this device</p>
+            <p role="status">Globe unavailable on this device</p>
             {onShowList ? (
               <button type="button" className={s.failedAction} onClick={onShowList}>
                 See all sites

@@ -1,6 +1,6 @@
 # TWIN WORLDS
 
-Earth's deserts, craters and lava fields, set beside the Mars and Moon landscapes they stand in for. The site has three pages: a landing page that introduces the worlds and the comparison, an atlas that places eighteen analogue sites on an interactive globe and scores each one against its destination, and a twelve-round signal test that asks you to name the world from a greyscale photograph.
+Earth's deserts, craters and lava fields, set beside the Mars and Moon landscapes they stand in for. The site has three pages: a landing page that introduces the worlds and the comparison, an atlas that places eighteen analogue sites on an interactive globe and scores each one against both Mars and the Moon, and a twelve-round signal test that asks you to name the world from a greyscale photograph.
 
 ## Run it
 
@@ -40,7 +40,8 @@ src/components/
                             similarity ring
   game/                     the normalised reconnaissance frame
   chrome/                   loader, cursor, starfield, stardust trail,
-                            space backdrop, progress bar, to-top, lightbox
+                            space backdrop, progress bar, to-top, lightbox,
+                            error boundary
   layout/                   nav, ticker, divider, footer
   sections/                 hero, worlds, fidelity, mars, moon, compare,
                             lookalikes, gallery, next steps, sources
@@ -52,7 +53,7 @@ src/styles/global.css       tokens, reset, base type, shared primitives
 public/textures/            the globe's Earth texture
 ```
 
-Each component carries its own `*.module.css`. Styles shared across components — tokens, typography, buttons, the reveal and tilt primitives — live in `src/styles/global.css`.
+Most components carry their own `*.module.css`. Styles shared across components — tokens, typography, buttons, the reveal and tilt primitives — live in `src/styles/global.css`, and the shared `ui` primitives (button, ghost, pills, reveal, section head) are styled from there rather than in their own modules.
 
 ## The globe
 
@@ -60,11 +61,11 @@ The atlas draws the Earth with three.js. The page is a lazy-loaded chunk, so thr
 
 The texture is NASA Earth Observatory's Blue Marble, `Land_ocean_ice_2048.jpg` (2048×1024, 266 kB), public domain, downloaded via Wikimedia Commons and stored locally at `public/textures/earth-blue-marble.jpg`. It is equirectangular, and the pins use the inverse of the sphere's UV mapping so each coast sits under its site.
 
-If WebGL is unavailable, or the texture or the context fails, the globe shows a short message and a control that scrolls to the ranked list; the site facts stay readable. Touch and mouse drag rotate the globe, pinch or scroll zooms it, and the zoom buttons are keyboard controls.
+If WebGL is unavailable, or the renderer cannot start, or the texture or the context fails, the globe shows a short message and a control that scrolls to the ranked list; the site facts stay readable. Touch and mouse drag rotate the globe, pinch or scroll zooms it, and the zoom buttons are keyboard controls.
 
 ## Similarity scores
 
-Every site is scored 0–100 against each destination it targets, on seven parameters:
+Every site is scored 0–100 against both Mars and the Moon, on seven parameters:
 
 | Parameter | Mars reference | Moon reference | Weight |
 | --- | --- | --- | --- |
@@ -74,7 +75,7 @@ Every site is scored 0–100 against each destination it targets, on seven param
 | Surface pressure | 0.6 kPa | effectively 0 | 0.15 |
 | Radiation load | about 250 mSv/yr | about 380 mSv/yr | 0.15 |
 | Regolith / mineralogy | basalt, iron oxides, sulfates | anorthosite, glass, nanophase iron | 0.12 |
-| Operational fidelity | 3–22 min light delay | 1.3 s light delay | 0.08 |
+| Operational value | Crewed analogues, 3–22 min delay, no resupply | Apollo surface training, 1.3 s delay | 0.08 |
 
 The rubric is fixed:
 
@@ -82,6 +83,8 @@ The rubric is fixed:
 - 75 — strong match
 - 50 — same process
 - 25 — same category
+
+The scale is a yardstick, not a grade: a score is measured against it, and even the best analogue sits far below the top band.
 
 The composite is the weighted mean of the seven scores, rounded, and is computed at runtime in `src/lib/similarity.js`; it is not stored in the data. Gravity is printed as a reference value but is not one of the scored parameters, because no site on Earth can differ from 1 g.
 
@@ -93,7 +96,11 @@ Each round's photograph is loaded at its source size, cover-fitted into a 480×2
 
 ## Data and sources
 
-`src/data/atlas.js` is the single source for the atlas and for the landing cards: change a site there and both pages follow. `src/data/sources.js` holds the citations shown in the Sources section. Imagery is hotlinked from Wikimedia Commons and NASA, except the globe texture, which is stored locally. The content is educational; the site makes no scientific claim of its own.
+`src/data/atlas.js` is the single source for the atlas and for the landing cards: change a site there and both pages follow. The exception is the "also considered" pills beside the landing sections: `MARS_ALSO` and `MOON_ALSO` in `src/data/sites.js` are a separate hardcoded list of places outside the atlas. `src/data/sources.js` holds the citations shown in the Sources section. Imagery is hotlinked from Wikimedia Commons and NASA, except the globe texture, which is stored locally. The content is educational; the site makes no scientific claim of its own.
+
+## Browser support
+
+Built for 2023 and later engines: it uses `color-mix()`, `inert`, CSS filters and WebGL. Each degrades on its own. Without `color-mix()` a few translucent tints fall back to their solid or inherited colour; without `inert` the page behind an open mobile sheet stays reachable, though the sheet's own focus trap still works; without CSS filters the game's frames show in colour; without WebGL the globe shows its fallback message and a control that scrolls to the ranked list, and every fact stays readable. Touch targets are at least 40 px, with one documented exception: the globe's pins are 36 px map markers, because 40 px targets at eighteen sites on one globe would overlap.
 
 ## Notes
 

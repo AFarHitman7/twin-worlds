@@ -35,6 +35,9 @@
 .fine { font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: 0.07em; line-height: 1.9; }
 .triad { margin-bottom: 0.35rem; font-size: var(--text-sm); line-height: 1.7; text-wrap: balance; }
 .fine a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
   color: var(--sun);
   text-decoration: underline;
   text-decoration-thickness: from-font;

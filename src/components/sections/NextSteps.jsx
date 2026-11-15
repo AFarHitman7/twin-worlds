@@ -140,7 +140,7 @@ export default function NextSteps() {
           kicker="FIELD RESEARCH"
           // The word is the spelled form of SITES.length.
           title="Eighteen sites, one globe."
-          copy="Places that rehearse Mars or the Moon, scored against their destination on seven parameters, with the limits of each one written down."
+          copy="Places that rehearse Mars or the Moon, scored against both bodies on seven parameters, with the limits of each one written down."
           stats={[`${SITES.length} SITES`, `${PARAMS.length} PARAMETERS`, `${BODIES.length} DESTINATIONS`]}
           cta={{ href: "#/atlas", label: "Open the atlas ↗" }}
           mark={<AtlasMark />}

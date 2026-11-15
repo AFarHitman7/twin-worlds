@@ -138,8 +138,10 @@ export default function ReconImage({
       ) : null}
 
       {status === "error" ? (
-        <div className={s.lost} role="status">
-          <span className={s.lostTitle}>Frame lost</span>
+        <div className={s.lost}>
+          <span className={s.lostTitle} role="status">
+            Frame lost
+          </span>
           <button
             type="button"
             className={s.retry}

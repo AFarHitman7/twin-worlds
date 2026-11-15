@@ -12,8 +12,6 @@ import { replaceRoute, useRoute } from "../router/useRoute.js";
 import s from "./Page.module.css";
 import atlas from "./AtlasPage.module.css";
 
-const BODY_NAME = BODY_LABEL;
-
 // The opening dossier is the strongest featured Mars analogue, not a name
 // typed into the page: change the data and the default follows.
 const FEATURED = SITES.filter((site) => site.featured);
@@ -58,9 +56,9 @@ function followSite(site, current) {
 
 function filterMessage(next) {
   if (next === "all") return `Showing all ${SITES.length} sites, ranked by Mars match`;
-  return `${BODY_NAME[next]} filter on. ${COUNTS[next]} analogues highlighted; all ${
+  return `${BODY_LABEL[next]} ranking on. ${COUNTS[next]} analogues highlighted; all ${
     SITES.length
-  } are listed, ranked by ${BODY_NAME[next]} match.`;
+  } are listed, ranked by ${BODY_LABEL[next]} match.`;
 }
 
 function selectionMessage(site) {
@@ -97,8 +95,11 @@ export default function AtlasPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [announcement, setAnnouncement] = useState("");
   const [tableOverflows, setTableOverflows] = useState(false);
+  const [globeFailed, setGlobeFailed] = useState(false);
   const selectedSlugRef = useRef(selectedSlug);
   const triggerRef = useRef(null);
+  const sheetFromUrlRef = useRef(null);
+  const headingRef = useRef(null);
   const tableWrapRef = useRef(null);
 
   useEffect(() => {
@@ -128,8 +129,13 @@ export default function AtlasPage() {
   const closeSheet = useCallback(() => {
     setSheetOpen(false);
     const trigger = triggerRef.current;
-    if (trigger && trigger.isConnected) {
-      window.requestAnimationFrame(() => trigger.focus({ preventScroll: true }));
+    // A sheet opened by a deep link has no clicked trigger to return to, so
+    // focus goes back to the atlas heading rather than to the document body.
+    const target =
+      trigger && trigger.isConnected ? trigger : headingRef.current;
+    triggerRef.current = null;
+    if (target) {
+      window.requestAnimationFrame(() => target.focus({ preventScroll: true }));
     }
   }, []);
 
@@ -145,7 +151,15 @@ export default function AtlasPage() {
     setSelectedSlug(next ? next.slug : DEFAULT_SLUG);
     if (!known) replaceRoute(`/atlas/${next ? next.slug : DEFAULT_SLUG}`);
     if (next) setFilter((current) => followSite(next, current));
-  }, [slug]);
+
+    // A deep link names a dossier, so a narrow screen opens it even though no
+    // pin was tapped. A URL with no slug keeps the sheet shut, and closing it
+    // by hand is not undone by a later resize of the same link.
+    if (known && !isDesktop && sheetFromUrlRef.current !== slug) {
+      sheetFromUrlRef.current = slug;
+      setSheetOpen(true);
+    }
+  }, [slug, isDesktop]);
 
   // The sheet belongs to the narrow layout only. Closing through the normal
   // path returns focus instead of losing it with the unmounted close button.
@@ -169,8 +183,9 @@ export default function AtlasPage() {
       setAnnouncement(selectionMessage(site));
 
       if (openSheet && !isDesktop) {
+        const active = document.activeElement;
         triggerRef.current =
-          document.activeElement instanceof HTMLElement ? document.activeElement : null;
+          active instanceof HTMLElement && active !== document.body ? active : null;
         setSheetOpen(true);
       }
     },
@@ -209,6 +224,11 @@ export default function AtlasPage() {
     });
   }, [reduced]);
 
+  // A globe that has failed cannot be tapped, so its hint is withdrawn with it.
+  const handleGlobeStatus = useCallback((next) => {
+    setGlobeFailed(next === "error");
+  }, []);
+
   const selectedSite = SITE_BY_SLUG.get(selectedSlug) ?? SITE_BY_SLUG.get(DEFAULT_SLUG);
   const rankBody = filter === "moon" ? "moon" : "mars";
   const rows = RANKED[rankBody];
@@ -229,14 +249,14 @@ export default function AtlasPage() {
         <div className={atlas.headGrid}>
           <div className={atlas.headMain}>
             <p className="kicker">PLANETARY ANALOGUE ATLAS · {SITES.length} SITES</p>
-            <h1 className="section__title" id="atlas-title">
+            <h1 className="section__title" id="atlas-title" ref={headingRef} tabIndex={-1}>
               The atlas
             </h1>
           </div>
           <div className={atlas.headAside}>
             <p className="section__lede">
               {SITES.length} places used to rehearse Mars and the Moon. Every score compares
-              the site with its destination, not the two planets with each other.
+              a site with Mars or the Moon, not the two planets with each other.
             </p>
             <p className={atlas.stats}>
               <span>{SITES.length} sites</span>
@@ -248,19 +268,24 @@ export default function AtlasPage() {
       </section>
 
       <div className={atlas.controls}>
-        <div className={atlas.chips} role="group" aria-label="Filter sites by destination">
-          {FILTERS.map((entry) => (
-            <button
-              key={entry.id}
-              type="button"
-              className={atlas.chip}
-              aria-pressed={filter === entry.id}
-              onClick={() => changeFilter(entry.id)}
-            >
-              {entry.label}
-              <span className={atlas.chipCount}>{COUNTS[entry.id]}</span>
-            </button>
-          ))}
+        <div className={atlas.chipBlock}>
+          <p className={atlas.chipLabel} id="rank-by-label">
+            Rank by
+          </p>
+          <div className={atlas.chips} role="group" aria-labelledby="rank-by-label">
+            {FILTERS.map((entry) => (
+              <button
+                key={entry.id}
+                type="button"
+                className={atlas.chip}
+                aria-pressed={filter === entry.id}
+                onClick={() => changeFilter(entry.id)}
+              >
+                {entry.label}
+                <span className={atlas.chipCount}>{COUNTS[entry.id]}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className={atlas.legend}>
@@ -281,10 +306,11 @@ export default function AtlasPage() {
               onSelect={handlePinSelect}
               filter={filter}
               onShowList={handleShowList}
+              onStatus={handleGlobeStatus}
             />
           </div>
 
-          {!isDesktop && !sheetOpen ? (
+          {!isDesktop && !sheetOpen && !globeFailed ? (
             <p className={atlas.tapHint}>Tap a pin to open its dossier</p>
           ) : null}
         </div>
@@ -315,7 +341,7 @@ export default function AtlasPage() {
           <h2 className="section__title" id="ranked-title">
             All sites, ranked
           </h2>
-          <p className={atlas.sortNote}>Ranked by {BODY_NAME[rankBody]} match</p>
+          <p className={atlas.sortNote}>Ranked by {BODY_LABEL[rankBody]} match</p>
         </div>
 
         {tableOverflows ? (
@@ -329,11 +355,11 @@ export default function AtlasPage() {
           className={atlas.tableWrap}
           tabIndex={tableOverflows ? 0 : undefined}
           role="region"
-          aria-label={`All sites ranked by ${BODY_NAME[rankBody]} match`}
+          aria-label={`All sites ranked by ${BODY_LABEL[rankBody]} match`}
         >
           <table className={atlas.table}>
             <caption className="visually-hidden">
-              All {SITES.length} analogue sites, ranked by {BODY_NAME[rankBody]} similarity.
+              All {SITES.length} analogue sites, ranked by {BODY_LABEL[rankBody]} similarity.
             </caption>
             <thead>
               <tr>
@@ -377,7 +403,7 @@ export default function AtlasPage() {
                     <td className={atlas.targets}>
                       {site.targets.map((target) => (
                         <span key={target} data-body={target}>
-                          {BODY_NAME[target]}
+                          {BODY_LABEL[target]}
                         </span>
                       ))}
                     </td>

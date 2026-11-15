@@ -68,6 +68,23 @@
   gap: 0.5rem;
 }
 
+.chipBlock {
+  min-width: 0;
+}
+
+/* The chips choose the ranking basis and dim pins; the list still shows all
+   sites, so the row is labelled as a ranking control, not a filter. */
+.chipLabel {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  line-height: 1.5;
+  color: var(--faint);
+  text-transform: uppercase;
+}
+
 .chip {
   display: inline-flex;
   align-items: center;
