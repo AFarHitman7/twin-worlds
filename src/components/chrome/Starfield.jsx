@@ -30,18 +30,20 @@ export default function Starfield() {
 
     const buildStars = () => {
       const area = width * height;
-      const count = Math.min(420, Math.floor(area / 4200));
+      // The hero needs a sky you can see without hunting for it; the scroll
+      // fade in SpaceBackdrop then keeps the same field quiet elsewhere.
+      const count = Math.min(640, Math.floor(area / 2600));
       stars = Array.from({ length: count }, () => ({
         x: Math.random() * width,
         y: Math.random() * height,
-        r: Math.random() * 1.6 + 0.3,
-        base: Math.random() * 0.6 + 0.25,
+        r: Math.random() * 1.7 + 0.55,
+        base: Math.random() * 0.45 + 0.55,
         tw: Math.random() * 2 + 0.4,
         phase: Math.random() * Math.PI * 2,
         depth: Math.random() * 0.85 + 0.15,
         speed: Math.random() * 8 + 2,
         color: PALETTE[Math.floor(Math.random() * PALETTE.length)],
-        streak: Math.random() < 0.18,
+        streak: Math.random() < 0.2,
       }));
     };
 
@@ -83,7 +85,7 @@ export default function Starfield() {
         const y = (star.y + fall * 4) % height;
         const px = star.x + easedX * 40 * star.depth;
         const py = y + easedY * 22 * star.depth;
-        const alpha = Math.max(0.05, star.base * (0.62 + 0.38 * Math.sin(t * star.tw + star.phase)));
+        const alpha = Math.max(0.3, star.base * (0.68 + 0.32 * Math.sin(t * star.tw + star.phase)));
         ctx.globalAlpha = alpha;
         ctx.fillStyle = star.color;
         if (star.streak && warp > 1.6) {

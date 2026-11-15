@@ -1,9 +1,15 @@
+/* The sky is driven by --sky (0.2 … 1), written on <html> by SpaceBackdrop:
+   1 in the landing hero, 0.2 everywhere else. Anything tied to it has to stay
+   legible at 1 and barely there at 0.2, so the alphas below are tuned for the
+   hero and let the multiplier do the fading. */
 .nebula {
   position: fixed; inset: 0; z-index: -5; pointer-events: none;
   background:
-    radial-gradient(55% 42% at 12% -5%, rgba(106, 168, 255, 0.1), transparent 62%),
-    radial-gradient(48% 40% at 98% 24%, rgba(201, 107, 74, 0.08), transparent 62%),
-    radial-gradient(50% 44% at 50% 114%, rgba(141, 155, 214, 0.09), transparent 62%);
+    radial-gradient(72% 52% at 50% -14%, rgba(158, 188, 228, 0.22), transparent 68%),
+    radial-gradient(58% 46% at 8% -4%, rgba(106, 168, 255, 0.26), transparent 62%),
+    radial-gradient(50% 42% at 98% 22%, rgba(201, 107, 74, 0.2), transparent 62%),
+    radial-gradient(54% 46% at 50% 112%, rgba(141, 155, 214, 0.22), transparent 62%);
+  opacity: var(--sky, 1);
   animation: nebulaDrift 30s ease-in-out infinite alternate;
 }
 @keyframes nebulaDrift {
@@ -12,22 +18,26 @@
 }
 
 /* faint deep-space dust clouds, desaturated — not neon */
-.aurora { position: fixed; inset: 0; z-index: -3; overflow: hidden; pointer-events: none; opacity: 0.42; filter: blur(70px); }
+.aurora {
+  position: fixed; inset: 0; z-index: -3; overflow: hidden; pointer-events: none;
+  opacity: calc(0.52 * var(--sky, 1)); filter: blur(70px);
+}
 .aurora span { position: absolute; width: 55vmax; height: 55vmax; border-radius: 50%; }
-.aurora .a1 { background: radial-gradient(circle, rgba(80,110,170,0.32), transparent 65%); top: -18%; left: -12%; animation: drift1 26s ease-in-out infinite alternate; }
-.aurora .a2 { background: radial-gradient(circle, rgba(170,110,70,0.24), transparent 65%); top: 8%; right: -16%; animation: drift2 32s ease-in-out infinite alternate; }
-.aurora .a3 { background: radial-gradient(circle, rgba(120,130,175,0.3), transparent 65%); bottom: -24%; left: 22%; animation: drift3 36s ease-in-out infinite alternate; }
-.aurora .a4 { background: radial-gradient(circle, rgba(200,180,150,0.16), transparent 65%); bottom: -10%; right: 12%; animation: drift1 28s ease-in-out infinite alternate-reverse; }
+.aurora .a1 { background: radial-gradient(circle, rgba(92, 124, 188, 0.38), transparent 65%); top: -18%; left: -12%; animation: drift1 26s ease-in-out infinite alternate; }
+.aurora .a2 { background: radial-gradient(circle, rgba(184, 122, 78, 0.28), transparent 65%); top: 8%; right: -16%; animation: drift2 32s ease-in-out infinite alternate; }
+.aurora .a3 { background: radial-gradient(circle, rgba(132, 143, 190, 0.34), transparent 65%); bottom: -24%; left: 22%; animation: drift3 36s ease-in-out infinite alternate; }
+.aurora .a4 { background: radial-gradient(circle, rgba(206, 186, 156, 0.2), transparent 65%); bottom: -10%; right: 12%; animation: drift1 28s ease-in-out infinite alternate-reverse; }
 @keyframes drift1 { to { transform: translate(8vw, 6vh) scale(1.15); } }
 @keyframes drift2 { to { transform: translate(-7vw, 9vh) scale(0.88); } }
 @keyframes drift3 { to { transform: translate(6vw, -7vh) scale(1.1); } }
 
-/* faint celestial chart grid */
+/* celestial chart grid — a legible instrument in the hero, a whisper after it */
 .grid {
-  position: fixed; inset: 0; z-index: -2; pointer-events: none; opacity: 0.35;
+  position: fixed; inset: 0; z-index: -2; pointer-events: none;
+  opacity: calc(0.1 + 0.45 * var(--sky, 1));
   background-image:
-    linear-gradient(rgba(180,195,220,0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(180,195,220,0.05) 1px, transparent 1px);
+    linear-gradient(rgba(180, 195, 220, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(180, 195, 220, 0.07) 1px, transparent 1px);
   background-size: 72px 72px;
   mask-image: radial-gradient(75% 65% at 50% 30%, #000 25%, transparent 100%);
   -webkit-mask-image: radial-gradient(75% 65% at 50% 30%, #000 25%, transparent 100%);
@@ -41,4 +51,5 @@
 
 @media (prefers-reduced-motion: reduce) {
   .aurora span { animation: none !important; }
+  .nebula { animation: none !important; }
 }

@@ -37,7 +37,7 @@ export default function App() {
       <ScrollProgress />
       <Starfield />
       <StardustTrail />
-      <SpaceBackdrop />
+      <SpaceBackdrop route={route} />
       <Nav route={route} />
 
       <Suspense fallback={<main id="main" aria-busy="true" style={{ minHeight: "60vh" }} />}>

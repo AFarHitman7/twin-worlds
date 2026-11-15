@@ -105,5 +105,6 @@ Built for 2023 and later engines: it uses `color-mix()`, `inert`, CSS filters an
 ## Notes
 
 - Motion respects `prefers-reduced-motion`: no globe spin, scanline, blinking REC or sheet slide.
+- The starfield and sky wash are deliberately bright on the landing hero and fade to a texture after it, so the background is perceivable at a glance without competing with body copy. `SpaceBackdrop` writes `--sky` on `<html>`; the starfield canvas, nebula, dust clouds and chart grid all read it. Under reduced motion the field is drawn once, still and at the same brightness.
 - State is local to the browser: the game's best score is kept in `localStorage`, and there are no accounts and no backend.
 - The atlas and the game are lazy-loaded. The site needs a network connection for its photographs.
