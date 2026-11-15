@@ -7,7 +7,7 @@ import Hero from "../components/sections/Hero.jsx";
 import Lookalikes from "../components/sections/Lookalikes.jsx";
 import Mars from "../components/sections/Mars.jsx";
 import Moon from "../components/sections/Moon.jsx";
-import Sources from "../components/sections/Sources.jsx";
+import NextSteps from "../components/sections/NextSteps.jsx";
 import Worlds from "../components/sections/Worlds.jsx";
 
 export default function LandingPage() {
@@ -23,7 +23,8 @@ export default function LandingPage() {
       <Compare />
       <Lookalikes />
       <Gallery />
-      <Sources />
+      <Divider text="✦ TWO WAYS ONWARD ✦" />
+      <NextSteps />
     </main>
   );
 }

@@ -101,6 +101,9 @@ export default function Hero() {
           <Button href="#/game" variant="brass" magnetic>
             Guess the planet ✦
           </Button>
+          <a className={s.atlasLink} href="#/atlas">
+            Open the atlas ↗
+          </a>
         </div>
 
         <div className={s.meta}>

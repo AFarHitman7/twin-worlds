@@ -1,7 +1,9 @@
+import { SITES } from "./atlas.js";
+
 export const HERO_TITLE = "Other worlds are closer than you think.";
 
 export const HERO_STATS = [
-  { count: 23, lines: ["analogue sites", "mapped"] },
+  { count: SITES.length, lines: ["analogue sites", "mapped"] },
   { count: 3, lines: ["worlds", "compared"] },
   { count: 12, lines: ["rounds in", "the game"] },
   { live: true, lines: ["live starfield", "warp on scroll"] },

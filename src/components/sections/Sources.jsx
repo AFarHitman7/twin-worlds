@@ -2,7 +2,6 @@ import { SOURCES } from "../../data/sources.js";
 import { useFinePointer, useReducedMotion } from "../../hooks/useMediaQuery.js";
 import { useTilt } from "../../hooks/useMotion.js";
 import { cx } from "../../lib/cx.js";
-import Ghost from "../ui/Ghost.jsx";
 import Reveal from "../ui/Reveal.jsx";
 import SectionHead from "../ui/SectionHead.jsx";
 import s from "./Sources.module.css";
@@ -33,9 +32,8 @@ function Source({ source, delay }) {
 export default function Sources() {
   return (
     <section className="section" id="sources">
-      <Ghost>09</Ghost>
       <SectionHead
-        kicker="DEEP ARCHIVE · 09 — KEEP GOING"
+        kicker="DEEP ARCHIVE — KEEP GOING"
         title={
           <>
             Go <span className="grad grad--fire">deeper.</span>

@@ -1,0 +1,107 @@
+/* The closing band: two doors out of the landing page, no numeral. */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(0.9rem, 2vw, 1.25rem);
+  align-items: stretch;
+}
+
+.cell { display: flex; }
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: clamp(1.4rem, 2.6vw, 2rem);
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) + 4px);
+  background: linear-gradient(168deg, var(--panel-2), var(--panel) 60%, var(--void));
+  overflow: hidden;
+  transition: translate 320ms var(--ease-out), border-color 300ms, box-shadow 320ms;
+}
+.card:hover {
+  translate: 0 -4px;
+  border-color: var(--line-strong);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+}
+
+.top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: clamp(1rem, 1.8vw, 1.5rem);
+}
+
+.kicker {
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: 500;
+  letter-spacing: var(--tracking-label);
+  line-height: 1.5;
+  text-transform: uppercase;
+  color: var(--faint);
+  padding-top: 0.35rem;
+}
+
+.mark {
+  display: block;
+  flex: 0 0 auto;
+  width: clamp(96px, 10vw, 116px);
+  height: auto;
+  color: var(--faint);
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+.title {
+  font-family: var(--font-huge);
+  font-size: clamp(1.45rem, 1.15rem + 1.2vw, 2rem);
+  font-weight: 300;
+  letter-spacing: var(--tracking-heading);
+  line-height: var(--leading-heading);
+  text-wrap: balance;
+  margin-bottom: 0.7rem;
+}
+
+.copy {
+  color: var(--muted);
+  font-size: var(--text-sm);
+  line-height: 1.65;
+  max-width: 46ch;
+  margin-bottom: 1.4rem;
+  text-wrap: pretty;
+}
+
+.stats {
+  margin-top: auto;
+  padding-top: 1.15rem;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  line-height: 1.8;
+  color: var(--faint);
+}
+.stats span { white-space: nowrap; }
+
+.cta { margin-top: 1.35rem; }
+
+.note {
+  margin-top: clamp(1.4rem, 3vw, 2rem);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  line-height: 1.9;
+  color: var(--faint);
+  text-align: center;
+  text-wrap: balance;
+}
+
+@media (max-width: 899px) {
+  .grid { grid-template-columns: minmax(0, 1fr); }
+}
