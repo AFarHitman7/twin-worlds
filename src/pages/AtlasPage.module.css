@@ -125,11 +125,13 @@
 }
 
 .legendNote {
+  max-width: 62ch;
   margin-top: 0.4rem;
   margin-left: auto;
   font-size: 0.8125rem;
   line-height: 1.5;
   color: var(--muted);
+  text-align: left;
   text-wrap: pretty;
 }
 

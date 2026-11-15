@@ -7,8 +7,9 @@ const BAND = 0.6;
 
 /**
  * Highlights the section the reader is in. A section is the last one whose
- * top has crossed the middle of the viewport and whose bottom is still on
- * screen; above the first section, and below the last, nothing is active.
+ * top has crossed the band, six tenths of the way down the viewport, and
+ * whose bottom is still on screen; above the first section, and below the
+ * last, nothing is active.
  * The check runs on every scroll, so a section is named even when no
  * IntersectionObserver entry fires. The public signature is unchanged: it
  * takes section ids and returns the active id, or an empty string for none.

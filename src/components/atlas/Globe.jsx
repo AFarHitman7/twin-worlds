@@ -269,11 +269,21 @@ export default function Globe({
     const check = new THREE.Euler(0, 0, 0, "YXZ");
     const before = new THREE.Quaternion();
 
+    // A hidden pin keeps its absolute position in the overlay, so a coordinate
+    // from a larger layout would still widen the page after a resize. Park it
+    // back at the stage origin until it is shown and placed again.
+    const PARK_TRANSFORM = "translate3d(-100px, -100px, 0) translate(-50%, -50%)";
+
     const hidePin = (pin) => {
-      if (pin.dataset.hidden === "true") return;
-      pin.style.visibility = "hidden";
-      pin.dataset.hidden = "true";
-      pin.tabIndex = -1;
+      if (pin.dataset.hidden !== "true") {
+        pin.style.visibility = "hidden";
+        pin.dataset.hidden = "true";
+        pin.tabIndex = -1;
+      }
+      if (pin.dataset.parked !== "true") {
+        pin.style.transform = PARK_TRANSFORM;
+        pin.dataset.parked = "true";
+      }
     };
 
     const showPin = (pin) => {
@@ -281,6 +291,7 @@ export default function Globe({
       pin.style.visibility = "visible";
       pin.dataset.hidden = "false";
       pin.tabIndex = 0;
+      delete pin.dataset.parked;
     };
 
     const placePins = () => {
@@ -417,6 +428,10 @@ export default function Globe({
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
+      camera.updateMatrixWorld();
+      // The stage can shrink while the loop is parked off screen: re-place the
+      // pins against the new size so none keep a stale, out-of-stage position.
+      placePins();
       measureDock();
     };
 
