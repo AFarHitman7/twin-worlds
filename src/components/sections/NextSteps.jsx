@@ -10,6 +10,9 @@ import Reveal from "../ui/Reveal.jsx";
 import SectionHead from "../ui/SectionHead.jsx";
 import s from "./NextSteps.module.css";
 
+// Earth, Mars and the Moon, read from the rounds rather than typed.
+const GAME_WORLDS = new Set(ROUNDS.map((round) => round.answer)).size;
+
 // A dotted globe with one orbit and one marker: the atlas, drawn rather than
 // rendered, so this band never pulls three into the landing chunk.
 function AtlasMark() {
@@ -124,29 +127,30 @@ export default function NextSteps() {
 
       <div className={s.grid}>
         <Door
-          kicker="FIELD RESEARCH"
-          // The word is the spelled form of SITES.length.
-          title="Eighteen sites, one globe."
-          copy="Drag the Earth, open a pin, read what makes the place Mars-like or Moon-like — and where it fails."
-          stats={[`${SITES.length} SITES`, `${PARAMS.length} PARAMETERS`, `${BODIES.length} DESTINATIONS`]}
-          cta={{ href: "#/atlas", label: "Open the atlas ↗" }}
-          mark={<AtlasMark />}
-          delay={0}
-        />
-        <Door
           kicker="TRAINING SIMULATION"
           // The word is the spelled form of ROUNDS.length.
           title="Twelve frames. No colour."
-          copy="Black and white, lower resolution, one guess each. The only clues are shape, tone and rock."
-          stats={[`${ROUNDS.length} FRAMES`, "480 × 270", "8-BIT GREY"]}
+          copy={`${ROUNDS.length} normalised frames across ${GAME_WORLDS} worlds, one guess each. Black and white and lower resolution; the only clues are shape, tone and rock.`}
+          stats={[`${ROUNDS.length} FRAMES`, `${GAME_WORLDS} WORLDS`, "1 GUESS EACH"]}
           cta={{ href: "#/game", label: "Play the test ↗", variant: "brass" }}
           mark={<FrameMark />}
+          delay={0}
+        />
+        <Door
+          kicker="FIELD RESEARCH"
+          // The word is the spelled form of SITES.length.
+          title="Eighteen sites, one globe."
+          copy="Eighteen places that rehearse Mars or the Moon, scored against their destination on seven parameters, with the limits of each one written down."
+          stats={[`${SITES.length} SITES`, `${PARAMS.length} PARAMETERS`, `${BODIES.length} DESTINATIONS`]}
+          cta={{ href: "#/atlas", label: "Open the atlas ↗" }}
+          mark={<AtlasMark />}
           delay={90}
         />
       </div>
 
       <Reveal as="p" className={s.note}>
-        NO ACCOUNT · NO SIGN-UP · TWELVE ROUNDS, EIGHTEEN SITES
+        NO ACCOUNT · NO <span className={s.keep}>SIGN-UP</span> · {ROUNDS.length} ROUNDS,{" "}
+        {SITES.length} SITES
       </Reveal>
     </section>
   );

@@ -23,7 +23,7 @@ export default function LandingPage() {
       <Compare />
       <Lookalikes />
       <Gallery />
-      <Divider text="✦ TWO WAYS ONWARD ✦" />
+      <Divider text="✦ END OF TRANSMISSION ✦" />
       <NextSteps />
     </main>
   );

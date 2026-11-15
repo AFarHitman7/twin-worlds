@@ -26,6 +26,9 @@ export default function Footer({ route = "/" }) {
           </a>
         ))}
       </nav>
+      <p className={s.triad}>
+        Three pages: the story, the atlas, the signal test.
+      </p>
       <p className={s.fine}>
         Built for students, the curious and space enthusiasts · signal ends ·{" "}
         <a href={onLanding ? "#top" : "#/"}>back to orbit ↑</a>

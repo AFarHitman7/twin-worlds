@@ -101,7 +101,8 @@
   text-align: center;
   text-wrap: balance;
 }
+.keep { white-space: nowrap; }
 
-@media (max-width: 899px) {
+@media (max-width: 719px) {
   .grid { grid-template-columns: minmax(0, 1fr); }
 }
