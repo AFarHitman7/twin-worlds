@@ -26,26 +26,30 @@
 }
 .stage[data-dragging="true"] { cursor: grabbing; }
 
-/* Soft planetary halo, borrowed from the palette at low alpha. */
+/* Soft planetary halo, borrowed from the palette at low alpha. It is a CSS
+   layer behind the canvas rather than a texture inside it: the gradient's last
+   stop is fully transparent at the layer's own edge, so no zoom or crop can
+   turn it into a rectangle. `--limb` is written by the render loop as the
+   globe's radius over the stage's half-width, which puts the warm band on the
+   limb at every zoom; the tail then fades out before the edge. */
 .glow {
   position: absolute;
   inset: 0;
   z-index: 0;
-  border-radius: 50%;
-  background:
-    radial-gradient(
-      circle at 50% 47%,
-      color-mix(in srgb, var(--earth) 9%, transparent) 0%,
-      transparent 58%
-    ),
-    radial-gradient(
-      circle at 50% 52%,
-      color-mix(in srgb, var(--signal) 11%, transparent) 0%,
-      transparent 68%
-    );
-  filter: blur(10px);
   pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    circle closest-side at 50% 50%,
+    transparent calc(var(--limb, 0.785) * 100%),
+    color-mix(in srgb, var(--sun) 16%, transparent)
+      calc((var(--limb, 0.785) + 0.035) * 100%),
+    color-mix(in srgb, var(--earth) 8%, transparent)
+      calc((var(--limb, 0.785) + 0.09) * 100%),
+    transparent 100%
+  );
+  transition: opacity 400ms var(--ease-out);
 }
+.stage[data-status="ready"] .glow { opacity: 1; }
 
 .canvasHost {
   position: absolute;

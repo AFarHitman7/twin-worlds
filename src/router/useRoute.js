@@ -56,8 +56,13 @@ export function useRoute() {
         return;
       }
       // scrollIntoView honours the section's scroll-margin, so the fixed nav
-      // does not cover the heading.
-      target.scrollIntoView({ block: "start", behavior: "instant" });
+      // does not cover the heading. "instant" is recent; older engines fall
+      // back to the default behaviour, as scrollToTop does.
+      try {
+        target.scrollIntoView({ block: "start", behavior: "instant" });
+      } catch {
+        target.scrollIntoView({ block: "start" });
+      }
     });
 
     return () => window.cancelAnimationFrame(frame);

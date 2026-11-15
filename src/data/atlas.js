@@ -647,7 +647,7 @@ export const SITES = [
         value: "Cinders, ash, basaltic gravel",
         moon: 88,
         mars: 68,
-        note: "Cinders and ash, with no anorthosite or nanophase iron; the crushed simulant is graded to a lunar grain size, which lifts it just past Craters of the Moon.",
+        note: "Cinders and ash, engineered into a known crater field: closer in texture than natural flows, still no anorthosite.",
       },
       ops: {
         value: "Apollo traverse practice",
@@ -1000,7 +1000,7 @@ export const SITES = [
     location:
       "The Danakil Depression in northern Ethiopia, below sea level. Reached by guided convoy; the area is hot, remote and occasionally unsafe.",
     geography:
-      "Salt flats, mineral terraces and hot springs, coloured green and yellow by sulphur and salt. The pools themselves are hypersaline and strongly acidic.",
+      "Salt flats, mineral terraces and hot springs, coloured green and yellow by sulphur and salt.",
     geology:
       "Hydrothermal brines deposit halite, gypsum, sulphur and jarosite, with iron oxides staining the pools. Akaganeite and hematite form alongside them.",
     atmosphere:

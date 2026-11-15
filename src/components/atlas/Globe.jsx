@@ -7,12 +7,14 @@ const RAD = Math.PI / 180;
 // NASA Blue Marble, public domain (NASA Earth Observatory / Reto Stoeckli),
 // 2048×1024 equirectangular, served from public/textures.
 const TEXTURE_URL = `${import.meta.env.BASE_URL}textures/earth-blue-marble.jpg`;
-const CAMERA_Z = 3.35;
-// The brief keeps the globe between 60% and 115% of the stage. With this lens
-// (38°) 115% is reached at z ≈ 2.72, so the near clamp sits at 2.75: the globe
-// may crop slightly at the closest zoom, which is intended.
-const ZOOM_MIN = 2.75;
-const ZOOM_MAX = 4.7;
+const FOV = 38;
+// Projected radius as a fraction of the stage's half-height is
+// 1 / (z · tan(fov/2)). The globe keeps an 8% margin at the near clamp (84%)
+// and the 60% floor at the far clamp, so the limb never touches the stage
+// edge; the default sits between them at about 78%.
+const CAMERA_Z = 3.7;
+const ZOOM_MIN = 3.46;
+const ZOOM_MAX = 4.84;
 const PITCH_LIMIT = 1.15;
 const DRAG_SPEED = 0.0055;
 const SPIN_STEP = 0.0012;
@@ -21,13 +23,10 @@ const VELOCITY_STOP = 0.0004;
 const FACING_MIN = 0.06;
 const PIN_SPACING = 22;
 const FOCUS_MS = 650;
-const ZOOM_STEP = 0.4;
-// The corner the zoom buttons occupy, in stage pixels: pins keep clear of it.
-const DOCK_W = 104;
-const DOCK_H = 68;
-// The halo sprite spans 3.6 globe radii, so the sun-lit stop of its gradient
-// lands on the limb and the tail is still fading at the corner of the stage.
-const HALO_SCALE = 3.6;
+const ZOOM_STEP = 0.2;
+// A pin is 26 px across; the dock keep-out adds a small visual gap.
+const PIN_HALF = 13;
+const DOCK_CLEARANCE = 6;
 
 // The opening view: the Atlantic, with Africa turning toward the camera and
 // South America at the limb, so both oceans and several pins read at once.
@@ -127,6 +126,14 @@ export default function Globe({
     apiRef.current?.focus(selected);
   }, [selected]);
 
+  // The dock mounts with the globe, after the first resize; measure its real
+  // box as soon as it exists so pins keep clear of the corner.
+  useEffect(() => {
+    if (status !== "ready") return undefined;
+    apiRef.current?.measureDock();
+    return undefined;
+  }, [status]);
+
   useEffect(() => {
     const stage = stageRef.current;
     const host = hostRef.current;
@@ -172,6 +179,8 @@ export default function Globe({
     let lastY = 0;
     let yawVelocity = 0;
     let pitchVelocity = 0;
+    let dockBox = null;
+    let lastLimb = 0;
 
     // The zoom buttons report their own clamp state, so a keyboard user can
     // see that an end of the range has been reached.
@@ -185,8 +194,27 @@ export default function Globe({
       );
     };
 
+    // The dock's real geometry, in stage pixels. Read from the rendered element
+    // rather than duplicating its CSS numbers; measured on resize and whenever
+    // the dock mounts.
+    const measureDock = () => {
+      const dock = stage.querySelector('[data-zoom-dock="true"]');
+      if (!dock) {
+        dockBox = null;
+        return;
+      }
+      const box = stage.getBoundingClientRect();
+      const rect = dock.getBoundingClientRect();
+      dockBox = {
+        left: rect.left - box.left,
+        top: rect.top - box.top,
+        right: rect.right - box.left,
+        bottom: rect.bottom - box.top,
+      };
+    };
+
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
+    const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 100);
     camera.position.set(0, 0, CAMERA_Z);
 
     const renderer = new THREE.WebGLRenderer({
@@ -214,50 +242,6 @@ export default function Globe({
     });
     const globe = new THREE.Mesh(geometry, material);
     globeGroup.add(globe);
-
-    // Air, borrowed from the page palette rather than invented. A camera-facing
-    // sprite carries the atmosphere: a radial gradient painted at runtime, so
-    // the halo's outer ring is fully transparent and no zoom can show an edge.
-    const css = getComputedStyle(document.documentElement);
-    const token = (name, fallback) =>
-      new THREE.Color(css.getPropertyValue(name).trim() || fallback);
-    const earthColor = token("--earth", "#6aa8ff");
-    const sunColor = token("--sun", "#ffd9a0");
-    const rgba = (color, alpha) => {
-      const value = parseInt(color.getHexString(THREE.SRGBColorSpace), 16);
-      const r = (value >> 16) & 255;
-      const g = (value >> 8) & 255;
-      const b = value & 255;
-      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-    };
-
-    const haloCanvas = document.createElement("canvas");
-    haloCanvas.width = 512;
-    haloCanvas.height = 512;
-    const haloContext = haloCanvas.getContext("2d");
-    const haloGradient = haloContext.createRadialGradient(256, 256, 0, 256, 256, 256);
-    haloGradient.addColorStop(0, "rgba(0, 0, 0, 0)");
-    haloGradient.addColorStop(0.5, "rgba(0, 0, 0, 0)");
-    haloGradient.addColorStop(0.56, rgba(sunColor, 0.2));
-    haloGradient.addColorStop(0.64, rgba(earthColor, 0.12));
-    haloGradient.addColorStop(0.78, rgba(earthColor, 0.03));
-    haloGradient.addColorStop(1, "rgba(0, 0, 0, 0)");
-    haloContext.fillStyle = haloGradient;
-    haloContext.fillRect(0, 0, 512, 512);
-
-    const haloTexture = new THREE.CanvasTexture(haloCanvas);
-    haloTexture.colorSpace = THREE.SRGBColorSpace;
-    const haloMaterial = new THREE.SpriteMaterial({
-      map: haloTexture,
-      transparent: true,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-    });
-    const halo = new THREE.Sprite(haloMaterial);
-    halo.scale.set(HALO_SCALE, HALO_SCALE, 1);
-    halo.renderOrder = -1;
-    // Behind the planet, so only the ring outside the limb is ever drawn.
-    scene.add(halo);
 
     const sun = new THREE.DirectionalLight(0xffffff, 2.1);
     sun.position.set(-2.4, 1.6, 2.2);
@@ -368,11 +352,21 @@ export default function Globe({
         let x = clamp(entry.x, 8, width - 8);
         let y = clamp(entry.y, 8, height - 8);
 
-        // The zoom dock owns the bottom-right corner: a pin that lands inside
-        // it steps aside to its left, so neither the dot nor its chip can sit
-        // under the buttons.
-        if (x > width - DOCK_W && y > height - DOCK_H) {
-          x = width - DOCK_W;
+        // The zoom dock owns the bottom-right corner. This runs after the
+        // declutter pass, so a pin the pass shifted left cannot land back
+        // inside the dock; the shifted pin's chip flips up, away from it.
+        if (dockBox) {
+          const reach = PIN_HALF + DOCK_CLEARANCE;
+          const inside =
+            x + reach > dockBox.left &&
+            x - reach < dockBox.right &&
+            y + reach > dockBox.top &&
+            y - reach < dockBox.bottom;
+          if (inside) {
+            const clear = dockBox.left - reach;
+            if (clear >= 8) x = clear;
+            else y = Math.max(8, dockBox.top - reach);
+          }
         }
 
         pin.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0) translate(-50%, -50%)`;
@@ -423,6 +417,7 @@ export default function Globe({
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
+      measureDock();
     };
 
     const observer = new ResizeObserver(resize);
@@ -465,6 +460,15 @@ export default function Globe({
 
       zoom += (zoomTarget - zoom) * Math.min(1, 0.18 * step);
       camera.position.z = zoom;
+
+      // The CSS halo follows the globe: --limb is the planet's projected radius
+      // as a fraction of the stage's half-width, so the warm band always starts
+      // on the limb while its gradient still ends at zero at the layer's edge.
+      const limb = 1 / (zoom * Math.tan((FOV * Math.PI) / 360));
+      if (Math.abs(limb - lastLimb) > 0.001) {
+        lastLimb = limb;
+        stage.style.setProperty("--limb", limb.toFixed(3));
+      }
 
       if (focusAnim) {
         const progress = clamp((time - focusAnim.start) / FOCUS_MS, 0, 1);
@@ -768,6 +772,7 @@ export default function Globe({
         interacted = true;
         syncZoomLimits();
       },
+      measureDock,
     };
 
     // A selected site that arrives with the first render (a deep link) still
@@ -795,8 +800,6 @@ export default function Globe({
       texture.dispose();
       geometry.dispose();
       material.dispose();
-      haloTexture.dispose();
-      haloMaterial.dispose();
       renderer.forceContextLoss();
       renderer.dispose();
       canvas.remove();
@@ -816,6 +819,35 @@ export default function Globe({
       >
         <div className={s.glow} aria-hidden="true" />
         <div ref={hostRef} className={s.canvasHost} aria-hidden="true" />
+
+        {status === "ready" ? (
+          <div
+            className={s.zoom}
+            data-zoom-dock="true"
+            role="group"
+            aria-label="Zoom"
+            onPointerDown={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className={s.zoomButton}
+              aria-label="Zoom in"
+              disabled={zoomLimits.in}
+              onClick={() => apiRef.current?.zoomBy(-1)}
+            >
+              <span aria-hidden="true">+</span>
+            </button>
+            <button
+              type="button"
+              className={s.zoomButton}
+              aria-label="Zoom out"
+              disabled={zoomLimits.out}
+              onClick={() => apiRef.current?.zoomBy(1)}
+            >
+              <span aria-hidden="true">−</span>
+            </button>
+          </div>
+        ) : null}
 
         <div className={s.overlay}>
           {sites.map((site, index) => {
@@ -856,34 +888,6 @@ export default function Globe({
             );
           })}
         </div>
-
-        {status === "ready" ? (
-          <div
-            className={s.zoom}
-            role="group"
-            aria-label="Zoom"
-            onPointerDown={(event) => event.stopPropagation()}
-          >
-            <button
-              type="button"
-              className={s.zoomButton}
-              aria-label="Zoom in"
-              disabled={zoomLimits.in}
-              onClick={() => apiRef.current?.zoomBy(-1)}
-            >
-              <span aria-hidden="true">+</span>
-            </button>
-            <button
-              type="button"
-              className={s.zoomButton}
-              aria-label="Zoom out"
-              disabled={zoomLimits.out}
-              onClick={() => apiRef.current?.zoomBy(1)}
-            >
-              <span aria-hidden="true">−</span>
-            </button>
-          </div>
-        ) : null}
 
         <div className={s.skeleton} aria-hidden="true">
           <span className={s.skeletonLabel}>Acquiring Earth…</span>
