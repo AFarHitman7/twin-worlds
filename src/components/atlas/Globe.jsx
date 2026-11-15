@@ -21,6 +21,13 @@ const VELOCITY_STOP = 0.0004;
 const FACING_MIN = 0.06;
 const PIN_SPACING = 22;
 const FOCUS_MS = 650;
+const ZOOM_STEP = 0.4;
+// The corner the zoom buttons occupy, in stage pixels: pins keep clear of it.
+const DOCK_W = 104;
+const DOCK_H = 68;
+// The halo sprite spans 3.6 globe radii, so the sun-lit stop of its gradient
+// lands on the limb and the tail is still fading at the corner of the stage.
+const HALO_SCALE = 3.6;
 
 // The opening view: the Atlantic, with Africa turning toward the camera and
 // South America at the limb, so both oceans and several pins read at once.
@@ -92,6 +99,7 @@ export default function Globe({
   const reducedRef = useRef(false);
   const [status, setStatus] = useState("loading");
   const [dragging, setDragging] = useState(false);
+  const [zoomLimits, setZoomLimits] = useState({ in: false, out: false });
   const reduced = useReducedMotion();
 
   // Props the render loop reads without being re-created for each render.
@@ -165,6 +173,18 @@ export default function Globe({
     let yawVelocity = 0;
     let pitchVelocity = 0;
 
+    // The zoom buttons report their own clamp state, so a keyboard user can
+    // see that an end of the range has been reached.
+    const syncZoomLimits = () => {
+      const next = {
+        in: zoomTarget <= ZOOM_MIN + 0.001,
+        out: zoomTarget >= ZOOM_MAX - 0.001,
+      };
+      setZoomLimits((current) =>
+        current.in === next.in && current.out === next.out ? current : next
+      );
+    };
+
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
     camera.position.set(0, 0, CAMERA_Z);
@@ -195,36 +215,49 @@ export default function Globe({
     const globe = new THREE.Mesh(geometry, material);
     globeGroup.add(globe);
 
-    // Air, borrowed from the page palette rather than invented.
+    // Air, borrowed from the page palette rather than invented. A camera-facing
+    // sprite carries the atmosphere: a radial gradient painted at runtime, so
+    // the halo's outer ring is fully transparent and no zoom can show an edge.
     const css = getComputedStyle(document.documentElement);
-    const earthColor = new THREE.Color(
-      css.getPropertyValue("--earth").trim() || "#6aa8ff"
-    );
-    const atmosphereGeometry = new THREE.SphereGeometry(1.035, 48, 32);
-    const atmosphereMaterial = new THREE.ShaderMaterial({
-      uniforms: { uColor: { value: earthColor } },
-      vertexShader: `
-        varying vec3 vNormal;
-        void main() {
-          vNormal = normalize(normalMatrix * normal);
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-      `,
-      fragmentShader: `
-        uniform vec3 uColor;
-        varying vec3 vNormal;
-        void main() {
-          float rim = pow(max(0.0, 0.72 - dot(vNormal, vec3(0.0, 0.0, 1.0))), 3.0);
-          gl_FragColor = vec4(uColor, rim * 0.34);
-        }
-      `,
+    const token = (name, fallback) =>
+      new THREE.Color(css.getPropertyValue(name).trim() || fallback);
+    const earthColor = token("--earth", "#6aa8ff");
+    const sunColor = token("--sun", "#ffd9a0");
+    const rgba = (color, alpha) => {
+      const value = parseInt(color.getHexString(THREE.SRGBColorSpace), 16);
+      const r = (value >> 16) & 255;
+      const g = (value >> 8) & 255;
+      const b = value & 255;
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    };
+
+    const haloCanvas = document.createElement("canvas");
+    haloCanvas.width = 512;
+    haloCanvas.height = 512;
+    const haloContext = haloCanvas.getContext("2d");
+    const haloGradient = haloContext.createRadialGradient(256, 256, 0, 256, 256, 256);
+    haloGradient.addColorStop(0, "rgba(0, 0, 0, 0)");
+    haloGradient.addColorStop(0.5, "rgba(0, 0, 0, 0)");
+    haloGradient.addColorStop(0.56, rgba(sunColor, 0.2));
+    haloGradient.addColorStop(0.64, rgba(earthColor, 0.12));
+    haloGradient.addColorStop(0.78, rgba(earthColor, 0.03));
+    haloGradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+    haloContext.fillStyle = haloGradient;
+    haloContext.fillRect(0, 0, 512, 512);
+
+    const haloTexture = new THREE.CanvasTexture(haloCanvas);
+    haloTexture.colorSpace = THREE.SRGBColorSpace;
+    const haloMaterial = new THREE.SpriteMaterial({
+      map: haloTexture,
       transparent: true,
       blending: THREE.AdditiveBlending,
-      side: THREE.BackSide,
       depthWrite: false,
     });
-    const atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
-    scene.add(atmosphere);
+    const halo = new THREE.Sprite(haloMaterial);
+    halo.scale.set(HALO_SCALE, HALO_SCALE, 1);
+    halo.renderOrder = -1;
+    // Behind the planet, so only the ring outside the limb is ever drawn.
+    scene.add(halo);
 
     const sun = new THREE.DirectionalLight(0xffffff, 2.1);
     sun.position.set(-2.4, 1.6, 2.2);
@@ -332,8 +365,15 @@ export default function Globe({
 
       for (const entry of visible) {
         const { pin, site, z } = entry;
-        const x = clamp(entry.x, 8, width - 8);
-        const y = clamp(entry.y, 8, height - 8);
+        let x = clamp(entry.x, 8, width - 8);
+        let y = clamp(entry.y, 8, height - 8);
+
+        // The zoom dock owns the bottom-right corner: a pin that lands inside
+        // it steps aside to its left, so neither the dot nor its chip can sit
+        // under the buttons.
+        if (x > width - DOCK_W && y > height - DOCK_H) {
+          x = width - DOCK_W;
+        }
 
         pin.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0) translate(-50%, -50%)`;
 
@@ -583,6 +623,7 @@ export default function Globe({
             ZOOM_MIN,
             ZOOM_MAX
           );
+          syncZoomLimits();
         }
         return;
       }
@@ -667,6 +708,7 @@ export default function Globe({
         ZOOM_MIN,
         ZOOM_MAX
       );
+      syncZoomLimits();
     };
 
     stage.addEventListener("pointerdown", onPointerDown);
@@ -720,6 +762,12 @@ export default function Globe({
         // Tabbing to a pin hands the globe to the keyboard user.
         interacted = true;
       },
+      zoomBy(direction) {
+        // Camera distance: a smaller z is closer to the planet.
+        zoomTarget = clamp(zoomTarget + direction * ZOOM_STEP, ZOOM_MIN, ZOOM_MAX);
+        interacted = true;
+        syncZoomLimits();
+      },
     };
 
     // A selected site that arrives with the first render (a deep link) still
@@ -747,8 +795,8 @@ export default function Globe({
       texture.dispose();
       geometry.dispose();
       material.dispose();
-      atmosphereGeometry.dispose();
-      atmosphereMaterial.dispose();
+      haloTexture.dispose();
+      haloMaterial.dispose();
       renderer.forceContextLoss();
       renderer.dispose();
       canvas.remove();
@@ -808,6 +856,34 @@ export default function Globe({
             );
           })}
         </div>
+
+        {status === "ready" ? (
+          <div
+            className={s.zoom}
+            role="group"
+            aria-label="Zoom"
+            onPointerDown={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className={s.zoomButton}
+              aria-label="Zoom in"
+              disabled={zoomLimits.in}
+              onClick={() => apiRef.current?.zoomBy(-1)}
+            >
+              <span aria-hidden="true">+</span>
+            </button>
+            <button
+              type="button"
+              className={s.zoomButton}
+              aria-label="Zoom out"
+              disabled={zoomLimits.out}
+              onClick={() => apiRef.current?.zoomBy(1)}
+            >
+              <span aria-hidden="true">−</span>
+            </button>
+          </div>
+        ) : null}
 
         <div className={s.skeleton} aria-hidden="true">
           <span className={s.skeletonLabel}>Acquiring Earth…</span>

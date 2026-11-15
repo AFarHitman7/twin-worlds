@@ -58,7 +58,9 @@ function followSite(site, current) {
 
 function filterMessage(next) {
   if (next === "all") return `Showing all ${SITES.length} sites, ranked by Mars match`;
-  return `Showing ${COUNTS[next]} ${BODY_NAME[next]} analogues, ranked by ${BODY_NAME[next]} match`;
+  return `${BODY_NAME[next]} filter on. ${COUNTS[next]} analogues highlighted; all ${
+    SITES.length
+  } are listed, ranked by ${BODY_NAME[next]} match.`;
 }
 
 function selectionMessage(site) {
@@ -94,12 +96,34 @@ export default function AtlasPage() {
   const [filter, setFilter] = useState("all");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [announcement, setAnnouncement] = useState("");
+  const [tableOverflows, setTableOverflows] = useState(false);
   const selectedSlugRef = useRef(selectedSlug);
   const triggerRef = useRef(null);
+  const tableWrapRef = useRef(null);
 
   useEffect(() => {
     selectedSlugRef.current = selectedSlug;
   }, [selectedSlug]);
+
+  // The swipe hint and the scroll region's tab stop belong to a table that
+  // actually overflows: neither is shown or reachable when the columns fit.
+  useEffect(() => {
+    const scroller = tableWrapRef.current;
+    if (!scroller) return undefined;
+
+    const measure = () =>
+      setTableOverflows(scroller.scrollWidth > scroller.clientWidth + 1);
+    measure();
+
+    if (typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", measure);
+      return () => window.removeEventListener("resize", measure);
+    }
+    const observer = new ResizeObserver(measure);
+    observer.observe(scroller);
+    if (scroller.firstElementChild) observer.observe(scroller.firstElementChild);
+    return () => observer.disconnect();
+  }, []);
 
   const closeSheet = useCallback(() => {
     setSheetOpen(false);
@@ -294,11 +318,16 @@ export default function AtlasPage() {
           <p className={atlas.sortNote}>Ranked by {BODY_NAME[rankBody]} match</p>
         </div>
 
-        <p className={atlas.swipeHint}>Swipe for Moon →</p>
+        {tableOverflows ? (
+          <p className={atlas.swipeHint} aria-hidden="true">
+            Swipe for Moon →
+          </p>
+        ) : null}
 
         <div
+          ref={tableWrapRef}
           className={atlas.tableWrap}
-          tabIndex={0}
+          tabIndex={tableOverflows ? 0 : undefined}
           role="region"
           aria-label={`All sites ranked by ${BODY_NAME[rankBody]} match`}
         >

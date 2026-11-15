@@ -27,8 +27,14 @@
 .links a::after, .links .currentLabel::after { content: ""; position: absolute; left: 0.8rem; right: 0.8rem; bottom: 0.25rem; height: 1px; background: var(--sun); transform: scaleX(0); transform-origin: left; transition: transform 0.3s var(--ease-out); }
 .links a:hover, .links a.isActive { color: #fff; background: rgba(214,226,240,0.06); }
 .links a:hover::after, .links a.isActive::after { transform: scaleX(1); }
-.links [aria-current="page"] { color: #fff; background: rgba(214,226,240,0.06); }
-.links [aria-current="page"]::after { transform: scaleX(1); }
+.links [aria-current="page"],
+.links [aria-current="location"] { color: #fff; background: rgba(214,226,240,0.06); }
+.links [aria-current="page"]::after,
+.links [aria-current="location"]::after { transform: scaleX(1); }
+/* On the landing page, Home stays announced as the page while a section is
+   named; it should not also look selected, or two items compete for the eye. */
+.links a.isQuiet:not(:hover) { color: var(--muted); background: transparent; }
+.links a.isQuiet:not(:hover)::after { transform: scaleX(0); }
 .toggle { display: none; flex-direction: column; gap: 5px; background: none; border: none; padding: 0.4rem; }
 .toggle span { width: 22px; height: 2px; background: var(--text); border-radius: 2px; transition: transform 250ms, opacity 250ms; }
 

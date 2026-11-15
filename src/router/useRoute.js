@@ -25,16 +25,43 @@ export function useRoute() {
 
   useEffect(() => {
     const onHashChange = () => {
-      // In-page anchors (#worlds) are not routes: leave the page as is.
-      // An empty hash is not an anchor either — it restores the landing page.
       const hash = window.location.hash;
-      if (hash && !hash.startsWith("#/")) return;
+      if (hash && !hash.startsWith("#/")) {
+        // A section anchor on the landing page leaves that page as it is; from
+        // another route it is a way back home, scrolled to that section.
+        setCurrent((previous) => (previous.route === "/" ? previous : HOME));
+        return;
+      }
       setCurrent(readRoute());
     };
 
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
   }, []);
+
+  // A section hash has to be honoured by the landing page itself: a direct
+  // load arrives before the section exists, and a return from the atlas or the
+  // game renders the page first, so the element only exists after this commit.
+  useEffect(() => {
+    if (current.route !== "/") return undefined;
+
+    const hash = window.location.hash;
+    if (!hash || hash.startsWith("#/") || hash === "#top") return undefined;
+
+    const frame = window.requestAnimationFrame(() => {
+      const target = document.getElementById(hash.slice(1));
+      if (!target) {
+        // A section that belongs to another page: land at the top instead.
+        scrollToTop();
+        return;
+      }
+      // scrollIntoView honours the section's scroll-margin, so the fixed nav
+      // does not cover the heading.
+      target.scrollIntoView({ block: "start", behavior: "instant" });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [current]);
 
   return current;
 }

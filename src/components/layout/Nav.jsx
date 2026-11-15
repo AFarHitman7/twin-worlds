@@ -72,8 +72,11 @@ export default function Nav({ route = "/" }) {
             ) : null}
             <a
               href={`#${page.path}`}
-              className={cx(page.mobileOnly && s.mobileOnly)}
-              aria-current={page.current && !(onLanding && active) ? "page" : undefined}
+              className={cx(
+                page.mobileOnly && s.mobileOnly,
+                page.current && onLanding && active && s.isQuiet
+              )}
+              aria-current={page.current ? "page" : undefined}
               onClick={follow(page.path)}
             >
               {page.label}
@@ -87,7 +90,7 @@ export default function Nav({ route = "/" }) {
                 key={link.id}
                 href={`#${link.id}`}
                 className={cx(active === link.id ? s.isActive : undefined)}
-                aria-current={active === link.id ? "page" : undefined}
+                aria-current={active === link.id ? "location" : undefined}
                 onClick={close}
               >
                 <em>{link.num}</em>

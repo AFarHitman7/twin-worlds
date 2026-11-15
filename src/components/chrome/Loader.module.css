@@ -15,7 +15,7 @@
 .rings::after {
   content: ""; position: absolute; inset: 48px; border-radius: 50%;
   background: radial-gradient(circle at 35% 30%, #fff, var(--sun) 55%, transparent 70%);
-  box-shadow: 0 0 18px rgba(255, 217, 160, 0.8);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--sun) 80%, transparent);
   animation: blink 1.1s ease-in-out infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }

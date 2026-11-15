@@ -647,7 +647,7 @@ export const SITES = [
         value: "Cinders, ash, basaltic gravel",
         moon: 88,
         mars: 68,
-        note: "Cinders and ash, but no anorthosite or nanophase iron.",
+        note: "Cinders and ash, with no anorthosite or nanophase iron; the crushed simulant is graded to a lunar grain size, which lifts it just past Craters of the Moon.",
       },
       ops: {
         value: "Apollo traverse practice",
@@ -1000,7 +1000,7 @@ export const SITES = [
     location:
       "The Danakil Depression in northern Ethiopia, below sea level. Reached by guided convoy; the area is hot, remote and occasionally unsafe.",
     geography:
-      "Salt flats, acid pools and mineral terraces around hot springs, coloured green and yellow by sulphur and salt. The pools themselves are hypersaline and strongly acidic.",
+      "Salt flats, mineral terraces and hot springs, coloured green and yellow by sulphur and salt. The pools themselves are hypersaline and strongly acidic.",
     geology:
       "Hydrothermal brines deposit halite, gypsum, sulphur and jarosite, with iron oxides staining the pools. Akaganeite and hematite form alongside them.",
     atmosphere:
@@ -1166,7 +1166,7 @@ export const SITES = [
     atmosphere:
       "High, dry and clear above the trade-wind cloud, with strong sun and cold nights. Snow falls in winter.",
     limits:
-      "High, but not cold enough, and the atmosphere is still thick.",
+      "It sits high, but not cold enough, and its atmosphere is still far thicker than either destination's.",
     text: "A caldera of basalt, pumice and lava tubes at about 2,000 m, below Spain's highest peak.",
     reality: "A high, dry caldera, but still warm and thick-aired.",
     source: "ESA Catalogue · ch. 27",

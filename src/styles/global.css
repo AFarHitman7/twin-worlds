@@ -261,6 +261,9 @@ button { font-family: inherit; cursor: pointer; color: inherit; }
   .kicker { font-size: 0.625rem; letter-spacing: 0.14em; gap: 0.55rem; }
   .kicker::before { width: 1.15rem; }
   .eyebrow { letter-spacing: 0.16em; }
+  /* A long transmission label may take two lines; the rules shrink to suit. */
+  .divider { gap: 0.8rem; }
+  .divider em { white-space: normal; text-align: center; }
 }
 @media (max-width: 360px) {
   .kicker::before { display: none; }

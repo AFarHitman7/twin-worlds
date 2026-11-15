@@ -287,10 +287,18 @@ export default function GamePage() {
                 <span className={s.scoreOf}> / {TOTAL}</span>
               </p>
               <p className={s.bestLine}>
-                {newBest ? <span className={s.newBest}>New best</span> : null}
-                <span>
-                  Best {best} / {TOTAL}
-                </span>
+                {newBest ? (
+                  <>
+                    <span className={s.newBest}>New best</span>{" "}
+                    <span>
+                      {best} / {TOTAL}
+                    </span>
+                  </>
+                ) : (
+                  <span>
+                    Best {best} / {TOTAL}
+                  </span>
+                )}
               </p>
               <p className={s.verdictLine}>{verdictLine}</p>
               <Button magnetic onClick={start} id="gameReplay">

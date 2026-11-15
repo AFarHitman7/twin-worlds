@@ -126,6 +126,8 @@ export default function SiteDossier({ site, dialog = false, open = false, onClos
       role={dialog ? "dialog" : undefined}
       aria-modal={dialog ? "true" : undefined}
       aria-label={dialog ? `${site.name} dossier` : undefined}
+      aria-hidden={dialog && !open ? "true" : undefined}
+      inert={dialog && !open ? true : undefined}
     >
       {dialog ? (
         <div className={s.sheetHead}>

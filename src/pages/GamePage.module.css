@@ -325,6 +325,12 @@
   text-align: center;
 }
 
+/* The verdict heading takes focus so the result is announced; it is not a
+   control, so the gold ring would only read as an empty box around the title. */
+.resultsHead h2:focus {
+  outline: none;
+}
+
 .finalScore {
   margin: 0.6rem 0 0.9rem;
   font-family: var(--font-huge);

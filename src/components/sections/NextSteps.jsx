@@ -130,7 +130,7 @@ export default function NextSteps() {
           kicker="TRAINING SIMULATION"
           // The word is the spelled form of ROUNDS.length.
           title="Twelve frames. No colour."
-          copy={`${ROUNDS.length} normalised frames across ${GAME_WORLDS} worlds, one guess each. Black and white and lower resolution; the only clues are shape, tone and rock.`}
+          copy="Black and white, lower resolution. The only clues are shape, tone and rock."
           stats={[`${ROUNDS.length} FRAMES`, `${GAME_WORLDS} WORLDS`, "1 GUESS EACH"]}
           cta={{ href: "#/game", label: "Play the test ↗", variant: "brass" }}
           mark={<FrameMark />}
@@ -140,7 +140,7 @@ export default function NextSteps() {
           kicker="FIELD RESEARCH"
           // The word is the spelled form of SITES.length.
           title="Eighteen sites, one globe."
-          copy="Eighteen places that rehearse Mars or the Moon, scored against their destination on seven parameters, with the limits of each one written down."
+          copy="Places that rehearse Mars or the Moon, scored against their destination on seven parameters, with the limits of each one written down."
           stats={[`${SITES.length} SITES`, `${PARAMS.length} PARAMETERS`, `${BODIES.length} DESTINATIONS`]}
           cta={{ href: "#/atlas", label: "Open the atlas ↗" }}
           mark={<AtlasMark />}
